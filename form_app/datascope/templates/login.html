@@ -1,0 +1,1597 @@
+{% extends "base.html" %} {% block content %}
+
+<style>
+  form {
+    width: 500px;
+    height: auto;
+    padding: 20px 20px 20px 20px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    margin: 50px auto;
+    border-radius: 20px;
+    content: "";
+    top: 0;
+    left: 0;
+    background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white */
+    z-index: 2;
+  }
+
+  form p {
+    text-align: center;
+  }
+
+  form h2 {
+    text-align: center;
+  }
+  .two-forms {
+    /* display: flex; */
+    /* gap: 30px; */
+    margin-top: 10px;
+  }
+  .input-box {
+    text-align: center; /* Center align the input fields */
+    margin-bottom: 10px;
+  }
+
+  .input-box input[type="text"],
+  .input-box input[type="email"],
+  .input-box input[type="password"],
+  .input-box select {
+    width: 75%;
+    padding: 5px;
+    margin: 50 auto;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    box-sizing: border-box;
+  }
+  /* Style submit button */
+  .btn-primary {
+    display: block;
+    margin: 20px auto;
+    width: 50%;
+    padding: 12px 20px;
+    /* margin-top: 10px; */
+    border: none;
+    outline: none;
+    border-radius: 30px;
+    background-color: rgba(255, 255, 255, 1);
+    color: #000000;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+  }
+
+  .btn-primary:hover {
+    color: #ffffff;
+    background-color: #000000;
+  }
+
+  /* Style link */
+  p a {
+    color: #060606;
+  }
+
+  p a:hover {
+    text-decoration: underline;
+  }
+  .reminder {
+    animation: reminderAnimation 0.9s ease infinite alternate;
+    color: rgba(153, 31, 31, 0.745);
+  }
+
+  @keyframes reminderAnimation {
+    0% {
+      opacity: 0; /* Start with opacity 0 */
+      transform: translateY(-10px); /* Move up slightly */
+    }
+    100% {
+      opacity: 1; /* End with full opacity */
+      transform: translateY(0); /* Return to normal position */
+    }
+  }
+  .button-loader {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .button-loader:after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border: 4px solid #fff;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    box-sizing: border-box;
+    transform-origin: 50% 50%;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  <h2><strong>Enter Questionnaire</strong></h2>
+  <a href="{% url 'signin_admin' %}" class="reminder"
+    ><strong>Switch to Admin Login</strong></a>
+  <div class="two-forms">
+    <div class="input-box">
+      <label for="university_name" class="form-label">University Name:</label
+      ><br />
+      <select
+        name="university_name"
+        id="university_name"
+        class="form-select"
+        required
+      >
+        <option value="">Select University</option>
+        <option value="B.R.A.B.U Muzaffarpur">B.R.A.B.U Muzaffarpur</option>
+        <option value="B.N.M.U Madhepura">B.N.M.U Madhepura</option>
+        <option value="J.P.U Chapra">J.P.U Chapra</option>
+        <option value="K.S.D.S.U Darbhanga">K.S.D.S.U Darbhanga</option>
+        <option value="L.N.M.U Darbhanga">L.N.M.U Darbhanga</option>
+        <option value="Magadh University Gaya">Magadh University Gaya</option>
+        <option value="M.M.H.P.U. Patna">M.M.H.P.U. Patna</option>
+        <option value="Munger University Munger">
+          Munger University Munger
+        </option>
+        <option value="Patna University Patna">Patna University Patna</option>
+        <option value="Patliputra University Patna">
+          Patliputra University Patna
+        </option>
+        <option value="Purnea University, Purnia">
+          Purnea University, Purnia
+        </option>
+        <option value="T.M.B.U Bhagalpur">T.M.B.U Bhagalpur</option>
+        <option value="V.K.S.U Ara">V.K.S.U Ara</option>
+        <option value="Aryabhatta Knowledge University Patna">
+          Aryabhatta Knowledge University Patna
+        </option>
+      </select>
+      <i class="bx bx-user"></i>
+    </div>
+    <div class="input-box" id="college_type_div">
+      <label for="college_type" class="form-label">College Type:</label><br />
+      <select
+        name="college_type"
+        id="college_type"
+        class="form-select"
+        required
+      >
+        <option value="">Select College Type</option>
+      </select>
+      <i class="bx bx-user"></i>
+    </div>
+    <div class="input-box" id="college_name_div">
+      <label for="college_name" class="form-label">College Name:</label><br />
+      <select
+        name="college_name"
+        id="college_name"
+        class="form-select"
+        required
+      >
+        <option value="">Select College</option>
+      </select>
+      <i class="bx bx-user"></i>
+    </div>
+  </div>
+  <button id="loading-button" class="btn btn-primary">Enter</button>
+</form>
+<script>
+  const button = document.getElementById("loading-button");
+  button.addEventListener("click", () => {
+    // Create a new button element
+    const overlayButton = document.createElement("button");
+
+    // Add attributes to the overlay button
+    overlayButton.textContent = "Please wait...";
+    overlayButton.disabled = true;
+    overlayButton.style.position = "absolute";
+    overlayButton.style.top = 0;
+    overlayButton.style.left = 0;
+    overlayButton.style.width = "100%";
+    overlayButton.style.height = "100%";
+    overlayButton.style.background = "transparent";
+    overlayButton.style.border = "none";
+    overlayButton.style.cursor = "not-allowed";
+
+    // Append the overlay button to the parent element (assuming button's parent is a relative positioned element)
+    button.parentElement.appendChild(overlayButton);
+
+    // Simulate a delay of 5 minutes (300,000 milliseconds)
+    setTimeout(() => {
+      overlayButton.remove();
+    }, 300);
+  });
+
+  document
+    .getElementById("university_name")
+    .addEventListener("change", function () {
+      var university = this.value;
+      var collegeTypeSelect = document.getElementById("college_type");
+      collegeTypeSelect.innerHTML = "";
+
+      var collegeTypeMap = {
+        admin: ["blank"],
+        "B.R.A.B.U Muzaffarpur": [
+          "Constituent",
+          "Affiliated",
+          "B.R.A.B.U. ((Only for University to Opt))",
+        ],
+        "B.N.M.U Madhepura": [
+          "Affiliated",
+          "Constituent",
+          "B.N.M.U (Only for University to Opt)",
+        ],
+        "J.P.U Chapra": [
+          "Affiliated",
+          "Constituent",
+          "J.P.U. ((Only for University to Opt))",
+        ],
+        "K.S.D.S.U Darbhanga": [
+          "Affiliated",
+          "Constituent",
+          "K.S.D.S.U((Only for University to Opt))",
+        ],
+        "L.N.M.U Darbhanga": [
+          "Affiliated",
+          "Constituent",
+          "L.N.M.U ((Only for University to Opt))",
+        ],
+        "Magadh University Gaya": [
+          "Affiliated",
+          "Constituent",
+          "Magadh University Nodal ((Only for University to Opt))",
+        ],
+        "M.M.H.P.U. Patna": [
+          "Affiliated",
+          "KRCs",
+          "MMHAPU University Nodal ((Only for University to Opt))",
+        ],
+        "Munger University Munger": [
+          "Affiliated",
+          "Constituent",
+          "Munger University Nodal ((Only for University to Opt))",
+        ],
+        "Patna University Patna": [
+          "Constituent",
+          "PU University Nodal ((Only for University to Opt))",
+        ],
+        "Patliputra University Patna": [
+          "Affiliated",
+          "Constituent",
+          "PPU University Nodal ((Only for University to Opt))",
+        ],
+        "Purnea University, Purnia": [
+          "Affiliated",
+          "Constituent",
+          "Purnea University Nodal ((Only for University to Opt))",
+        ],
+        "T.M.B.U Bhagalpur": [
+          "Affiliated",
+          "Constituent",
+          "TMBU University Nodal ((Only for University to Opt))",
+        ],
+        "V.K.S.U Ara": [
+          "Affiliated",
+          "Constituent",
+          "VKSU University Nodal ((Only for University to Opt))",
+        ],
+        "Aryabhatta Knowledge University Patna": [
+          "Affiliated",
+          "AKU University Nodal ((Only for University to Opt))",
+        ],
+      };
+
+      // Populate the college type select dropdown with options based on the selected university
+      var collegeTypes = collegeTypeMap[university];
+      if (collegeTypes) {
+        var defaultOption = document.createElement("option");
+        defaultOption.value = ""; // Empty value
+        defaultOption.text = "Select College Type";
+        collegeTypeSelect.appendChild(defaultOption);
+        // collegeTypeSelect.appendChild("Select  College Type: ", False);
+        collegeTypes.forEach(function (type) {
+          var option = document.createElement("option");
+          option.value = type;
+          option.text = type;
+          collegeTypeSelect.appendChild(option);
+        });
+      }
+
+      // Show the college type dropdown
+      document.getElementById("college_type_div").style.display = "block";
+    });
+
+  document
+    .getElementById("college_type")
+    .addEventListener("change", function () {
+      var university = document.getElementById("university_name").value;
+      var collegeType = this.value;
+      var collegeSelect = document.getElementById("college_name");
+      collegeSelect.innerHTML = ""; // Clear the current options
+
+      // Define the list of colleges for each college type
+      var collegeMap = {
+        admin: {
+          blank: ["blank"],
+        },
+        "B.R.A.B.U Muzaffarpur": {
+          Constituent: [
+            "Braj Mohan Das College, Dayalpur, Vaishali (Id: C-19035)",
+            "Chandradeo Narain College, Sahebganj, Muzaffarpur (Id: C-19011)",
+            "Deochand College, Hajipur (Id: C-19010)",
+            "Dr. Ram Manohar Lohiya Smarak College, Muzaffarpur (Id: C-18985)",
+            "Dr. Shree Krishna Sinha Women's College, Motihari (Id: C-19023)",
+            "J.L.College, Hajipur (Id: C-19012)",
+            "J.S.College, Chandaul, Sitamarhi (Id: C-18993)",
+            "Jang Bahadur Singh Dhanaur College, Bakuchi, Muzaffarpur (Id: C-19017)",
+            "Jawaharlal Nehru Memorial College, Ghorasahan (Id: C-18995)",
+            "Jiwachh College, Motipur, Muzaffarpur (Id: C-18997)",
+            "Khemchand Tarachand College, Raxaul (Id: C-19021)",
+            "L.N.D. College, Motihari (Id: C-19018)",
+            "L.N.T. College, Muzaffarpur (Id: C-19009)",
+            "L.S.College, Muzaffarpur (Id: C-19014)",
+            "Laxmi Narayan College, Bhagwanpur, Vaishali (Id: C-18981)",
+            "M.D.D.M. College, Muzaffarpur (Id: C-18996)",
+            "M.J.K. College, Bettiah (Id: C-19030)",
+            "M.P.S. Sc. College, Muzaffarpur (Id: C-19031)",
+            "Mahant Shi'vshankar Giri College, Areraj, East Champaran (Id: C-19000)",
+            "Mskb College, Muzaffarpur (Id: C-18998)",
+            "Muniswar Singh Muneswari Samta Mahavidyalaya, Jandaha, (Vaishali) (Id: C-18991)",
+            "Munshi Singh College, Motihari (Id: C-19001)",
+            "Nitishwar College, Muzaffarpur (Id: C-19022)",
+            "R.B.B.M. College, Muzaffarpur (Id: C-19016)",
+            "R.C.College, Dholi, Sakra, Muzaffarpur (Id: C-18980)",
+            "R.D.S.College, Muzaffarpur (Id: C-19020)",
+            "R.L.S.Y. College, Bettiah (Id: C-19019)",
+            "R.P.S. College, Chakeyaj, Vaishali (Id: C-18990)",
+            "R.S.S.Sc. College, Sitamarhi (Id: C-18983)",
+            "Raj Narain College, Hajipur (Id: C-19029)",
+            "Rajkiya Degree Mahavidyalaya Pakridayal East Chamaparan (Id: C-64465)",
+            "Rajkiya Degree Mahavidyalya (Id: C-65394)",
+            "Rajkiya Degree Mahavidyalaya, Sheohar (C-102)",
+            "Rameshwar Singh College, Muzaffarpur (Id: C-19033)",
+            "Ramsewak Singh Mahila College, Sitamarhi (Id: C-18989)",
+            "Shiv Deni Ram Ayodhya Prasad College, Barachakia (Id: C-19024)",
+            "Sri Laxmi Kishori College, Sitamarhi (Id: C-19032)",
+            "Sri Narayan Singh College, Motihari (Id: C-19007)",
+            "Sri Radha Krishna Goenka College, Sitamarhi (Id: C-18986)",
+            "Sri Raghav Prasad Singh College, Jaintpur, Muzaffarpur (Id: C-19006)",
+            "Tarkeshwar Prsasad Verma College, Narkatiyaganj (Id: C-19013)",
+            "Vaishali Mahila College, Hajipur (Id: C-19008)",
+          ],
+          Affiliated: [
+            "A P J Abdul Kalam Degree College",
+            "A. College, Mahua",
+            "A.B.S.College, Lalganj",
+            "Abha Teachers Training Institute",
+            "Abul Kalam Minority Teachers Training Bed College",
+            "Adarsh Champaran Degree College",
+            "Asha College Of Professional Studies",
+            "Baba Bhagwat Rai Degree Mahavidyalay, Telhua, Nautan, West Champaran",
+            "Baba Bhutnath College, Bagaha",
+            "Babasaheb Bhimrao Ambedkar Mahavidyalay Valmikinagar West Champaran",
+            "Baidyanath Shukla College Of Education",
+            "Balmiki Teachers Training College",
+            "Basundhara Teachers Training College",
+            "Bhagwati College Of Education",
+            "Bharti Shikshak Prashikshan Mahavidyalaya",
+            "Bihar College Of Education",
+            "Birchand Patel Smarak Mahavidyalaya, Desri, Vaishali",
+            "Champaran Group Of Institutions, Marjadwa Parsa, Mainatand, West Champaran, Bettiah",
+            "Chanakya College Of Education",
+            "Chandrasheel College Of Education",
+            "Chaurasiya B.Ed. College, Hajipur.",
+            "Dashrath Prasad Singh Institute Of Teachers Education",
+            "Dr Ganesh Ray Degree College, Sitamarhi",
+            "Dr Indal Singh Ram Janki Degree College",
+            "Dr. Jagannath Mishra College, Muzaffarpur",
+            "Dr. Mahachandra Prasad Singh B.Ed. College, Chandwara, Muzaffarpur.",
+            "Dr. S.P. Singh College Of Teacher Education, Laxmipur, Areraj Road, Post-shankar Saraiya, Turkaulia, Motihari, East Champaran",
+            "Dulari Institute Of Education Centre",
+            "Er Upendra Sharma Teachers Training College",
+            "Exalt College Of Education",
+            "G.M.H.P. College, Bagaha",
+            "Government T.T.B.Ed. College, Turki, Muzaffarpur",
+            "Heera Lal Roy Teacher Training College",
+            "Indu Devi Ranjeet Kumar Prakash College",
+            "Indu Devi Ranjeet Kumar Prakash Professional College",
+            "Islamia Degree College, Kanti, Muzaffarpur",
+            "J.R.A. Teachers Training College",
+            "Jageshwar Ray Arti B.Ed. College",
+            "Jawahar Lal Nehru Memorial College, Sitamarhi",
+            "L. P. Shahi Institute Of Teacher S Education",
+            "L.N. Mishra College Of Business Management (B.Ed. Course), Muzaffarpur",
+            "L.N. Mishra College Of Business Management, Muzaffarpur",
+            "Lalganj Mahavidyalay Lalganj",
+            "Lichhavi College Of Teacher's Training College, Hajipur, Vaishali",
+            "M.M. Mahila College, Bettiah",
+            "Mahatma Buddha Teachers Training College",
+            "Mahavir Upadhyay Memorial Degree College Dhaka East Champaran",
+            "Maheshwar Prasad Shahi College Sitamarhi",
+            "Makhdum Bakhash Memorial Degree College",
+            "Mata Sita Sunder College Of Education Village Dhanhara Po Manik Chowk Ps Runni Saidpur",
+            "Matashri Kaushalya Ramdev Dr Ganesh Rai Degree College",
+            "Meena Baskit Ray Degree Mahavidyalaya Vaishali",
+            "Muzaffarpur College Of Professional Education",
+            "N G M Degree Mahavidyalaya Bhelahi East Champaran",
+            "Nageena Ramdhyan Shikshak Shiksha Mahavidyalaya",
+            "National College Of Education",
+            "Nirsu Narayan College, Singhara, Vaishali",
+            "Nitesh Kumar Smarak Mahavidyalay Paharpurtoi Vaishali",
+            "Orakh Thakur Memorial Degree College, Motipur, Sandha, Muzaffarpur",
+            "Pandit Ugam Pandey College, Motihari",
+            "Paramount Teachers Training College, Muzaffarpur",
+            "Priya Rani Rai Degree College, Bairgania",
+            "Pt. U.S.T.M. College, Bagaha",
+            "Pt. Yamuna Karjee Jayanti College, Bagahi, Muzaffarpur",
+            "R G College Of Education",
+            "R.P.S Teachers Training College",
+            "Radha Krishna Sikaria Educational Institution",
+            "Raghunath Pandey Memorial Law College",
+            "Rajeev College Of Pharmacy",
+            "Rajkeshwar Rao Nandangarh Degree Mahavidyalaya",
+            "Ram Baran Ray B.Ed. College",
+            "Ram Lagan Ray Degree College Rajapakar Vaishali",
+            "Ram Sharan Roy College Of Pharmacy",
+            "Ram Sharan Roy College Panapur Makkanpur",
+            "Ram Shrestha Singh College Teacher Training Wing",
+            "Ramshreshtra Singh College, Chochahan, Belsar, Muzaffarpur",
+            "Roy College Of Education",
+            "S.M. Shoaib Hashmi Education And Welfare Trust Group Of Institution,s.M. Shoaib Hashmi B.Ed. College",
+            "S.N.S. College, Hajipur",
+            "Sai Baba College Of Education",
+            "Sant Tapasvi Narayan Das Shikshan Sansthan",
+            "Satyendra Kishan College Of Education",
+            "Shaheed Pramod Bed College",
+            "Shri Narayan Sharma Teachers Training College",
+            "Siddique Memorial Teacher Training College",
+            "Sikaria Pharmacy College",
+            "Sri Ram Janki Swami Sahjanand Saraswati Snatak Mahavidyalaya",
+            "Sri Umesh Mishra Ranjeet Kumar Prakash College",
+            "Sushant Teachers Training College, Muzaffarpur",
+            "Syamnandan Sahay College, Muzaffarpur",
+            "The Oxford College Of Education",
+            "Trident Teachers Training College, Muzaffarpur",
+            "Urmila Devi Sadanand Yadav Gurukul Degree College",
+            "Vaishali Institute Of Business And Rural Management",
+            "Vaishali Institute Of Education And Technology",
+            "Vedant Institute Of Education And Technology",
+            "Vishun Rajdeo Teachers Training College",
+            "Satyanam Satyaguru B.Ed. College",
+          ],
+          "B.R.A.B.U. ((Only for University to Opt))": "",
+        },
+        "B.N.M.U Madhepura": {
+          Constituent: [
+            "B.N.M.V. College, Sahugadh (Id: C-29577)",
+            "B.S.S. College, Supaul (Id: C-29615)",
+            "H.S. College, Udakishunganj (Id: C-29593)",
+            "HARI PRASAD SAH COLLEGE, NIRMALI (Id: C-29624)",
+            "K.P. College, Murliganj (Id: C-29580)",
+            "L.N.M.S. College, Birpur (Id: C-29602)",
+            "M.H.M. College, Sonbarsa (Id: C-29639)",
+            "M.L.T. College, Saharsa (Id: C-29614)",
+            "P.Sc. College, Madhepura (Id: C-29589)",
+            "R.Jha Mahila College, Saharsa (Id: C-29608)",
+            "R.M. College, Saharsa (Id: C-29632)",
+            "R.M.M. Law College, Saharsa (Id: C-29603)",
+            "S.N.S.R.K.S. College, Saharsa (Id: C-29579)",
+            "T.P. College, Madhepura (Id: C-29582)",
+          ],
+          Affiliated: [
+            "A.L.Y. College, Tribeniganj",
+            "Adarsh College, Ghailarah",
+            "B.S. College, Simraha",
+            "C.M. Science. College, Madhepura",
+            "D N Degree College Bakhri Madhepura",
+            "Degree College, Supaul",
+            "East N West Teachers Training College, Patuaha",
+            "Evening College, Saharsa",
+            "Govt. Teacher's Training College, Saharsa",
+            "K.B.Women's College, Madhepura",
+            "K.N.D. College, Raghopur",
+            "Kamla Rana Science College, Prashant Nagar Sapardah, Puraini, Madhepura",
+            "L.N. College, Bangow",
+            "Lahtan Choudhary College Pastwar Baluaha Mahishi",
+            "M. P. College Of Education, Chandni Chowk",
+            "Madhepura College, Madhepura",
+            "Mohan Shakuntala Teachers Training College",
+            "R.P.M. College, Tuniyahi",
+            "Radheshyam Teachers Training College, Pathra",
+            "Ramchandra Vidyapeeth",
+            "S.A.K.N.D. College, Madhepura",
+            "S.N.S. Mahila College, Supaul",
+            "S.P.M. Law College, Madhepura",
+            "Subhash Chandra Teachers Training College, Khurda",
+            "U.V.K. College, Karama",
+          ],
+          "B.N.M.U (Only for University to Opt)": "",
+        },
+        "J.P.U Chapra": {
+          Constituent: [
+            "Bhola Prasad singh College, Bhore (Id: C-6488)",
+            "DAV Post Graduate College, Siwan (Id: C-7961)",
+            "Ganga Singh College, Chapra (Id: C-6458)",
+            "Gopeshwar College,Hathwa (Id: C-19496)",
+            "Hari Ram College, Mairwa (Id: C-19498)",
+            "Hotilal Ramnath College, Amnour (Id: C-6461)",
+            "Jagdam College, Chapra (Id: C-6465)",
+            "Jaglal Chaudhary College, Chapra (Id: C-6476)",
+            "Jai Prakash Mahila College, Chapra (Id: C-6491)",
+            "Kamla Rai College, Gopalganj (Id: C-19492)",
+            "Mahendra Mahila College, Gopalganj (Id: C-6454)",
+            "Nand Lal Singh College, Daudpur (Id: C-6464)",
+            "Narayan College Goreya Kothi (Id: C-7958)",
+            "Prabhu Nath College, Parsa (Id: C-19499)",
+            "Prithwi Chand Vigyan College, Chapra (Id: C-6459)",
+            "Raja Singh College, Siwan (Id: C-6479)",
+            "Rajendra College, Chapra (Id: C-6487)",
+            "Ram Bilas Ganga Ram College, Maharajganj (Id: C-6480)",
+            "Ram Jaipal College, Chapra (Id: C-6489)",
+            "Vidya Bhawan Mahila College,Siwan (Id: C-7969)",
+            "Yadunandan College, Dighwara (Id: C-6486)",
+          ],
+          Affiliated: [
+            "A.Y.T. Teachers Training College",
+            "Acharya Drona Institute For Teachers Training",
+            "Baikunth Teachers Training College",
+            "Basudeo Singh Memorial B. Ed. College, Mashrak, Saran",
+            "Bisheshwaar Dayal Sinha Memorial Mahila College, Chapra",
+            "Daroga Prasad Rai Degree College, Siwan",
+            "Deshratna Rajendra Degree College, Ziradei",
+            "Devraha Baba Sridhar Das Degree College, Rampur,kadna, Garkha",
+            "Gorakh Singh College (B.Ed. Courses), Maharahganj",
+            "Lok Mahavidyalaya, Hafipur, Baniyapur",
+            "Mata Rojhni Devi Chhathu Ram Degree College, Mairwa",
+            "Mathura Singh Teacher Training College",
+            "Mazhrul Haque Degree College, Tarwara",
+            "Prakash B.Ed Teachers Training College",
+            "Pratik College Of Education",
+            "Purvottar Railway College,sonpur",
+            "Rajendra Kishori B.Ed.College",
+            "Ramadhar Singh Teachers Training College",
+            "S R Teacher Training College",
+            "Shyam Sai Institute Of Education",
+            "Sri Kant Babu Degree College, Kuchaikote",
+            "Sri Mahendra Das Degree College,mathiya, Nechua Jalalpur",
+            "Subhwanti Institute Of Education",
+            "Zakia Afaque Islamia College, Siwan",
+            "Maharani Punam Sahi B.Ed. College, Hathwa, Gopalganj",
+            "Solanki B.Ed. Teacher Training College",
+          ],
+          "J.P.U. ((Only for University to Opt))": "",
+        },
+        "K.S.D.S.U Darbhanga": {
+          Constituent: [
+            "Adinath Parash Mani Skt. College, Rahua Sangram, Madhubani (Id: C-9619)",
+            "Akhil Bharatiye Skt. Hindi Vidypeeth, Khamhar, Begusarai (Id: C-9666)",
+            "Awadh Bihari Sanskrit College, Rahimpur, Khagaria (Id: C-9634)",
+            "Baba Sahib Ram Sanskrit College, Pacharhi, Darbhanga (Id: C-9673)",
+            "Baidyanath Pandey Arya Sanskrit College, Siwan (Id: C-9672)",
+            "Bharat Mishra Sanskrit College, Chapra (Id: C-9632)",
+            "Brajbhushan Sanskrit College, Kharkhura, Gaya (Id: C-9641)",
+            "Dharma Samaj Sanskrit College, Muzaffarpur (Id: C-9658)",
+            "Government Sanskrit College, Bhagalpur (Id: C-9662)",
+            "Government Sanskrit College, Kajipur, Patna (Id: C-9667)",
+            "Jagdamba Sanskrit College, Batho, Darbhanga (Id: C-9633)",
+            "Kalyani Mithila Sanskrit College, Deep, Madhubani (Id: C-9630)",
+            "L P N Sanskrit College, Baunsi,  Banka (Id: C-9626)",
+            "L.N.R. Sanskrit College, Jaideopatti, Darbhanga (Id: C-9617)",
+            "M.A.Rameshwar Lata Sanskrit College, Darbhanga (Id: C-9614)",
+            "M.M. Lata Sanskrit Vidyapeeth, Lohana, Madhubani (Id: C-9659)",
+            "Madaneshwarnath Sanskrit College, Madaneshwar Asthan, Madhubani (Id: C-9660)",
+            "Mahanth Keshaw Sanskrit College, Fathuha, Patna (Id: C-9640)",
+            "Nagarjun Umesh Sanskrit College, Tarauni, Darbhanga (Id: C-9645)",
+            "Nandan Sanskrit College, Ishahpur, Madhubani (Id: C-9652)",
+            "Nimbark Krishna Madhawanand Skt. College, Dhanamath, Patna (Id: C-9627)",
+            "Purnima Ram Pratap Sanskrit College, Baigani, Darbhanga (Id: C-9642)",
+            "Radha Umakant Sanskrit College, Sukhsena, Purnea (Id: C-9637)",
+            "Raghavendra Sanskrit College, Taretpali, Naubatpur, Patna (Id: C-9663)",
+            "Ramadhin Mishra Bhaskaroday Sanskrit College, Deorahia, Buxar (Id: C-9624)",
+            "Ramautar Goutam Sanskrit College, Ahilya Asthan, (Id: C-9616)",
+            "Shiv Prasad Sanskrit Degree College, Rampur, Buxar (Id: C-9656)",
+            "Shri Ram Sanskrit College, Vijayeepur, Gopalganj (Id: C-9646)",
+            "Shri Rishikul Br. Sanskrit College, Bediban Madhuban, East Champ. (Id: C-9613)",
+            "Sidheshwari Sanskrit College, Pachrukhiya, Bhojpur (Id: C-9655)",
+            "Ugra Tara Bharati Mandan Sanskrit College, Mahishi, Saharsa (Id: C-9664)",
+          ],
+          Affiliated: [
+            "Basudev Skt.College, Akbarpur",
+            "Bharteshwari Marwari Skt.College, Chapra",
+            "Ch.Skt.College, Hathua, Gopal.",
+            "D.H.S.C.Skt.College, Chanpura",
+            "Deobharti Skt Upshastri College Uchchirma Gaya",
+            "Dr Ram Krishana Thakur Janta Skt Mahavidhalaya, Eakhari, Madhubani",
+            "G.G.Skt.College, Bakhtiyarpur",
+            "G.M.Skt.College, Bangaon",
+            "G.R.Skt.College, Bairgainea",
+            "G.R.Skt.College,mahiya .Chapra",
+            "Harihar skt mahavidyalaya Bakulahr Math West Champaran",
+            "Hathuaraj Gyanoday skt college Mandiri Patna Upshashtri",
+            "J.M.Skt. College, Pastan",
+            "J.S.Skt.College, Majholiya, W. Champaran",
+            "Jagdish Narayana Bharmcharya Ashram skt upsastri Mahavidyalay Lagma",
+            "Janki skt upshastri Mahavidyalay Narkatiaganj Paschim Champaran.",
+            "K.N.K.Skt.College,mahrail,madhubani",
+            "L.P.R.L.Skt.College,samaul,birsayar,madh.",
+            "Laxmiwati Sanskrit Upshastri Mahavidyalay Sairsab-pahi Madhubani",
+            "Mahanth Shatanand Giri Harihar Sanskrit College,bodhgaya.",
+            "Mukhlal Sanskrit Upshastri College Bandhu Chhapra,barahara,bhojpur",
+            "P.V.Skt.College,andharatharhi,madhubani",
+            "Pandit Nachari Jha Sanskrit Mahavidhyalaya, Bahadurpur, Samastipur",
+            "Rajkiya Degree Mahavidyalay, Sheohar",
+            "Rishikulashram Upshastri Sanskrit Mahavidhalay",
+            "Rudra skt upshastri College, Hulas, Supaul",
+            "S,n.M.R.Skt.College,basaunakala",
+            "S.N.Skt.College,chatauni",
+            "S.R.N.D.M.Skt.College, Patna City",
+            "S.R.P.Skt.College, Patepur, Vaishali",
+            "S.R.Skt.College,satouti,jahanabad",
+            "Sanskrit Mahavidhyalay Pothia Katihar Bihar",
+            "Sarbjit Skt Upshastri Mahavidyalay Lahata Darbhanga",
+            "Sarswati Bilas Skt.College.Shokhara Barauni",
+            "Shahid Shiv skt college Haripur Dihtol Block - Kaluahi Dist - Madhubani",
+            "Shree Mahanth Vaidehi Sharan Skt College, Naugachhia, Bhagalpur",
+            "Shri Darshan skt upshastri College Maniyari Muzaffarpur",
+            "Sidheswari Laxminath Skt College, Gajahara",
+            "Skt.College,rosara",
+            "Sri Ravneshwar skt college, Gidhaur",
+            "Sri Shankar Sanskrit Upshastri College, Shahpur, Begusarai",
+            "Umakant Radhakant skt mahavidyalaya, Jhanjharpur",
+            "Upshastri skt college, Pindaruch, Darbhanga,",
+            "Nityanand skt. college",
+            "Shyamacharan skt. Vidyapeeth, Banka",
+            "Pt. Madankant Jha Mahavidyalay Kamla Samastipur",
+            "Vishwanath Skt College Morgan, Samastipur",
+            "Amilal Bahua Sanskrit Upshastri College, Khara Budhama, Madehpura",
+            "Anant Lal Sarvajanik Sanskrit Upshastri College, Jamua Khamgara, Araria",
+            "Laxmeshwar Jha Janta Sanskrit College Khajedih Ladania Madhubani",
+            "Sanskrit Upshahtri College, Hardawan, Gaya",
+          ],
+          "K.S.D.S.U((Only for University to Opt))": "",
+        },
+        "L.N.M.U Darbhanga": {
+          Constituent: [
+            "A.N.D. College (Id: C-8787)",
+            "A.P.S.M. College (Id: C-8784)",
+            "B. M. A. College (Id: C-8767)",
+            "B. M.College,Rahika (Id: C-8759)",
+            "Bali Ram Bhagat College, Samastipur (Id: C-8752)",
+            "C. M. College (Id: C-8712)",
+            "C. M. Law College (Id: C-8718)",
+            "C. M. Sc. College (Id: C-8774)",
+            "C.M.B. College (Id: C-8724)",
+            "C.M.J. College (Id: C-8713)",
+            "D.B. College (Id: C-8727)",
+            "D.B.K.N. College (Id: C-8743)",
+            "Dr. L.K.V.D.College (Id: C-8755)",
+            "G.D. College (Id: C-8771)",
+            "G.M.R.D. College (Id: C-8780)",
+            "Harsh Pati Singh College, Madhepur, Madhubani  (Id: C-8732)",
+            "J. K. College, Biraul (Id: C-8764)",
+            "J. N. College, Nehra (Id: C-8711)",
+            "J.M.D.P.L.M. College (Id: C-8761)",
+            "J.N. College (Id: C-8733)",
+            "K. S. College (Id: C-8779)",
+            "K.V.Sc. College, (Id: C-8760)",
+            "Lalit Narayan Janta College  (Id: C-8739)",
+            "M. K. College (Id: C-8776)",
+            "M. L.S. College (Id: C-8740)",
+            "M. R. M. College (Id: C-8736)",
+            "M.K.S. College (Id: C-8769)",
+            "M.L.S.M. College (Id: C-8768)",
+            "Marwari College (Id: C-8754)",
+            "Millat College (Id: C-8722)",
+            "R. K. College (Id: C-8786)",
+            "R.B. College (Id: C-8715)",
+            "R.B.S. College, Andaur (Id: C-8790)",
+            "R.C.S. College (Id: C-8741)",
+            "R.N.A.R. College (Id: C-8763)",
+            "R.N.College (Id: C-8714)",
+            "S.K. Mahila College (Id: C-8757)",
+            "Samastipur College (Id: C-8728)",
+            "SBSS College (Id: C-8720)",
+            "SUB-DIVISIONAL GOVERNMENT DEGREE COLLEGE BENIPUR",
+            "U.P. College (Id: C-8744)",
+            "U.R. College, Rosera (Id: C-8737)",
+            "V.S.J. College (Id: C-8717)",
+            "Women's College (Id: C-8777)",
+          ],
+          Affiliated: [
+            "A.H.S.A. College",
+            "A.M.M. College Benipur",
+            "Al Hasan T T College Samastipur",
+            "Baba Vishwanath Kedarnath Vimala College",
+            "Bahera College, Bahera",
+            "Bibi Fatma Teachers' Training College",
+            "C.M.B. Colege Deorah Ghoghardiha Madhubani",
+            "C.R. College, Kishanpur, Samastipur",
+            "D.N.Y. College",
+            "Dr Gauri Brahmanand T T College Ballopur",
+            "Dr. Apj Abdul Kalam Women's Institute of Technology",
+            "Dr. Z.H.T.T. College",
+            "Fakhruddin Ali Ahmad Teachers Training College",
+            "G M College of Pharmacy",
+            "G.K.P.D. College",
+            "Govt. College of Teacher Education Samastipur",
+            "I.B.M. Bela",
+            "J.P. Shikshak Prashikshan Mahavidyalya",
+            "Janki Devi Gaurishankar Saraf Degree Mahila Mahavidyalay Jaynagar Madhubani",
+            "Janta Degree College, Korthu",
+            "K.S.R. College, Sarairanjan",
+            "Kiran T T College Dahivat Navrattan",
+            "L.C.S College",
+            "L.K. Mishra College of Teacher Education",
+            "Lutan Jha Mahavidyalaya Nanaur Jhanjharpur",
+            "M.B.College of Education",
+            "M.M. College",
+            "M.M. Dental College",
+            "M.M.Rahmani B.Ed. College",
+            "M.M.T. College",
+            "M.T.T. College",
+            "Madhepur T T College Madhepur",
+            "Mahant Ram Jivan Das College, Vishnupur, Begusarai",
+            "Mahanth Narayan Das College",
+            "Mahatma Gandhi College, Sundarpur",
+            "Maulana Mazharul Haque Teachers Training College",
+            "Meghraj Memorial B.Ed. College",
+            "Mithila B.Ed. College",
+            "Mithila Institute of Post Graduate Studies and Research in Sanskrit, Darbhanga",
+            "Mithila T T College Basuara",
+            "Mr.S.M. College Anandpur",
+            "N.Jha M. College Lsarai",
+            "Oriental College of Education",
+            "P.D.K. Jha College",
+            "P.L.M. College Jhanjharpur",
+            "Q.A. Deg College, Zale",
+            "R.B.J. College",
+            "R.B.S. College, Teyai",
+            "R.K.A. Vidhi College",
+            "R.L.S.R.S.M. College,",
+            "Ram Charitra Singh Smarak College, Bihat, Begusarai, Bihar",
+            "Ram Niranjan Janta Degree College, Rampur, Madhwapur",
+            "Rameshwar Laxmi Mahto Teachers Training College Rosera",
+            "Rural Inst. Of H.E., Birauli",
+            "S.J.M.S.V. T.T. College, Dalsingsarai",
+            "S.K. College Thatia",
+            "S.M.R.C.K. College",
+            "S.N.M. College, Vstan",
+            "Sant Kabir College",
+            "Saryug Dental College",
+            "Sati Bharat College Parari",
+            "Shaheed Peer Ali Teachers Training College",
+            "Shyam School Of Education",
+            "Sonawati College Of Education",
+            "St Paul Teachers Training College Birsinghpur",
+            "Sub Divisional Government Degree College Benipur",
+            "Sukdeo Mahto Janta Mahavidyalaya, Khajedih",
+            "Swami Vivekanand B Ed T T College Basudeopur",
+            "Tara College Of Education",
+            "Vedmati Bhabnath Chaudhary College of Education",
+            "Vidhi Mahavidyalaya, Samastipur",
+            "Z.A.T. T. College. Bahera",
+          ],
+          "L.N.M.U ((Only for University to Opt))": "",
+        },
+        "Magadh University Gaya": {
+          Constituent: [
+            "AM College (Id: C-12867)",
+            "ANS College,Nabinagar (Id: C-12880)",
+            "Daudnagar College, Daudnagar (Id: C-12868)",
+            "Gaya College, Gaya (Id: C-12911)",
+            "GBM College (Id: C-12930)",
+            "JJ College (Id: C-12959)",
+            "KLS College, (Id: C-12924)",
+            "KSM College (Id: C-12879)",
+            "MG College (Id: C-12938)",
+            "RLSYCollege (Id: C-12904)",
+            "RMWCollege (Id: C-12941)",
+            "S Sinha College (Id: C-12882)",
+            "Satyendra Narain Sinha College, Tekari  (Id: C-12842)",
+            "SBAN College, Darheta Lari (Id: C-12861)",
+            "SBAM Degree College",
+            "Sheodeni Sao College, Kaler (Id: C-12958)",
+            "Shri Mahanth Satanand Giri College (Id: C-12833)",
+            "SN Sinha College, Jehanabad (Id: C-12912)",
+            "SN Sinha College, Warsaliganj (Id: C-12932)",
+            "SS College, (Id: C-12881)",
+            "TS College, Hisua (Id: C-12899)",
+          ],
+          Affiliated: [
+            "ANS College",
+            "ANSM College Aurangabad",
+            "Bhagwan Prasad Sheonath Prasad Bed College Duadnagar Aurangabad",
+            "Siddharta Teachers Training College",
+            "Sri Bhagwat Prasad Singh Memorial Institute of Higher Education",
+            "Sri Ram Suhag Tilak College of Education",
+            "Sri Ramchand Ram Laxmi Narayan Teachers Training College",
+            "Sri Shravan Kumar BEd and DElEd College",
+            "TBDSCollege, Goh",
+            "Teacher Training College",
+            "Triveni College Of Education",
+            "VKSCollege, Rafiganj",
+            "VSRoy M College, Sherghati",
+            "Bhuneshwar Prasad Yadav College Gaya",
+            "Warsi College Pandey Gangout Nawada",
+            "Wazirganj College, Gaya",
+            "Dr. Ram Narayan Prasad College Arwal",
+            "Brilliant Institute of Education",
+            "CSJanta College,",
+            "Dashrath Prasad Ramnandan Pandey BEd College",
+            "Devendra Pathak Sarvodaya College of Education, Dubhal Gaya",
+            "Digmani BEdCollege",
+            "DrArvind Kumar College, Bishanpur",
+            "DrBRAmbedkar College of Education",
+            "FSanda College, Fatehpur",
+            "Adhikari College Silar, Aurangabad",
+            "Ganauri Ramkali Teachers Training College",
+            "Gaureshwar Naraian Singh Teachers Training College",
+            "Gaya Evening College Gaya (Day Mode)",
+            "GovtTeacher's Training College, Gaya",
+            "Guro Binda College",
+            "Gyan Bharti College of Education",
+            "Gyan Bharti Teachers Training College",
+            "Gyan Prakash College of Education",
+            "Jajba Teacher Training College",
+            "Jang Bahadur Singh Memorial College, Bijauli, Aurangabad, Bihar",
+            "Al-momin College of Education",
+            "Janta Mahavidhyalay Labhri Parsawan Amba",
+            "Jehal Parsad Teachers Training College",
+            "Jehanabad College, Jehanabad",
+            "K P S College Kinjar Arwal",
+            "KKMScCollege, Daudnagar",
+            "KPSSna College, HGanj",
+            "KPSCollege",
+            "KSYCollege, Barun",
+            "Kesho Mahto Memorial College, Pathra, Imamganj, Gaya, Bihar",
+            "Sita Ram Sahu College Bhadauni Nawada",
+            "Allama Iqbal Teachers Training College",
+            "Krishak College,pakri Barwan",
+            "Kusum Yadav College Tarari Daudnagar Aurangabad",
+            "LMCollege",
+            "Lalan Prasad Yadav College Belaganj Gaya",
+            "Laldhari Memorial College",
+            "Late Kamta Prasad Sharma BEdCollege",
+            "M S Y College Kinzar Mirzapur Arwal",
+            "MPCollege, Balsara",
+            "MSYCollege",
+            "BLBEdCollege",
+            "Maa Bageshwari College Gaya",
+            "Maa Kamla Chandrika Jee Teachers Training College",
+            "Magadh College Of Education",
+            "Magadh Mahavidyalaya",
+            "Magadh Teachers Training Bed College, Aurangabad",
+            "Magadh Teachers Training College (Co-ed)",
+            "Magadh Teachers Training College, Gaya",
+            "Mahabodhi College",
+            "Mahadeva Lal Schroff College of Pharmacy",
+            "Mahavir College",
+            "BBMCollege, Okari",
+            "Mahesh Singh BEd College",
+            "Mahila College, Daudnagar",
+            "Mahila College, Tekari",
+            "Mahila College, Warsaliganj",
+            "Modern College of Education",
+            "Modern Institute of Higher Education",
+            "Nardiganj College Nardiganj",
+            "Nawada Vidhi Mahavidyalaya, Nawada",
+            "Patel College Of Education",
+            "Phalguni Prasad Yadav College Chakai, Jamui",
+            "BNCollege, Sobh",
+            "Pragya College Of Pharmaceutical Sciences",
+            "Prakash Punj Teachers Training College",
+            "R P College",
+            "RSY College Deokundaurangabad",
+            "RCSCollege, Kurtha",
+            "RLSYCollege",
+            "Raghu Saroj Welfare and Charitable Trust",
+            "Ram Lakhan Singh Yadav College, Jehanabad",
+            "Rameshwar Singh Pharmacy College",
+            "Rameshwar Singh Teachers Training College",
+            "BPAzad College of Education",
+            "Ramrati Sundar Shila College Daudnagar, Aurangabad",
+            "Ravi Kant Punam B Ed College",
+            "Ravikant Punam Mahavidyalaya",
+            "Regional College of Education",
+            "Rural Teachers Training College",
+            "S A College Nawada",
+            "SDCollege, Pariya",
+            "SGMCollege",
+            "SJSCollege, Kurtha",
+            "SKMCollege,",
+            "Bhabha Institute of Education",
+            "SSYCollege",
+            "Sahdev Prasad Yadav College Arwal",
+            "Sanjay Singh Yadav College Rafiganj",
+            "Sant Maalik Memorial Institute",
+            "Saptrishi College, Rajauli, Nawada",
+            "Shakya Muni College, Bodh Gaya, Gaya",
+            "Sharda Girdhari Keshri College Maheshkhunt Khagaria",
+            "Shree Mahadeo Prasad College",
+            "Shri Bhagwat Prasad Singh Memorial BEdCollege",
+            "Maa Kamla ChandrikaJee Vidyapeeth, Hulasganj, Jehanabad",
+          ],
+          "Magadh University Nodal ((Only for University to Opt))": "",
+        },
+        "M.M.H.P.U. Patna": {
+          Constituent: [
+            "Asian Institute of Management and Information Technology Kankarbagh Patna (AIMIT) (KRC-151)",
+            "ALI NAGAR PALI MANAGEMENT COLLEGE (Id: C-59625)",
+            "Ambedkar Institute Of Health Education (Krc-341)",
+            "Aryabhatta Institute Of Technical Education (Krc-343)",
+            "Aryabhatta Teachers Training College (Id: C-60839)",
+            "Baba Heera Singh Deepa Singh Jee Primary Teachers Training College (Id: C-64107)",
+            "Baba Vishwanath Kedarnath Vimala College, Samastipur- (Krc-238)",
+            "Baidyanath College Of Education (Id: C-59534)",
+            "Bihar Institute Of Technology And Management (Id: C-55670)",
+            "Buddha Multiplex Hotel And Management (Id: C-60426)",
+            "Chanakya Foundation (Id: C-65402)",
+            "Chandragupta Maurya College Of Education (Id: C-55882)",
+            "CHETAN SADHAN INSTITUTE OF SCIENCE AND TECHNOLOGY (Id: C-51749)",
+            "COLLEGE OF MANAGEMENT AND TECHNOLOGY (RR SAHU CENTRE) (Id: C-52118)",
+            "Crescent School Of Education And Training (Id: C-62207)",
+            "Dr Trishuldhari Pandey Memorial College Of Education (Id: C-61006)",
+            "Fatima Degree College, Patna (Id: C-47461)",
+            "Gautam Budh Teachers Training College (Id: C-61005)",
+            "Indian Institute Of Technical Skills, Iits Madhubani",
+            "Insan Degree College, Kishanganj (Id: C-47460)",
+            "Kainat Institute Of Mang & Tech Haya& TechHaya",
+            "Kanti Devi Teacher Training College (Id: C-60328)",
+            "Kaushalya Ramadhar Educational Trust (Id: C-70161)",
+            "KRC -227 VPS Computer, An Institute of IT & Management, Begusarai",
+            "KRC 220 Smriti College of Technology and Management",
+            "KRC 248 Indian Institute Of Technical Skills, Madhubani",
+            "KRC 254 Dream Land Vocational Institute Dalsinghsarai, Samastipur",
+            "KRC 313 Ali Nagar Pali Management College",
+            "KRC 314 Hariom Technical training college Gaya",
+            "KRC_343 Aryabhatta Institute Of Technical Education KRC_343",
+            "KRC-235 MINNAT FOUNDATION Patna",
+            "KRC-253 Admire Institute Of Management and Technology Begusarai",
+            "KRC-341 AMBEDKAR INSTITUTE OF HEALTH EDUCATION",
+            "KRC-344 Hi-Tech IT Education Pvt Ltd",
+            "Krishnamaya Institute Of Higher Education (Krc Code:- 342)",
+            "MAA KAMLA CHANDRIKA JEE MANAGEMENT TRAINING INSITUTE (Id: C-58286)",
+            "Madrasa islamia (Id: C-51558)",
+            "Mahamaya College Of Education Vill-devkali, Po-sarsauli,ps-obra (Id: C-60104)",
+            "Maxford Teachers Training College (Id: C-58302)",
+            "MOTHERS INTERNATIONAL TECHNICAL AND MANAGEMENT INSTITUTE (Id: C-56371)",
+            "Nagina Devi Teachers Training College (Id: C-65322)",
+            "Nalanda Business College",
+            "National BEdCollege Of Higher Education (Id: C-60838)",
+            "National Business College (Id: C-52105)",
+            "Nazirul Hasan Teachers Training College (Id: C-58564)",
+            "Nusrat Banu educational welfare society (Id: C-51578)",
+            "Padum Lal Rupan Singh BEdAnd DElEdCollege (Id: C-59465)",
+            "Premlata Madan Mohan College Of Education (Id: C-61588)",
+            "PURNEA BUSINESS COLLEGE (Id: C-56054)",
+            "Rajmuni Devi BEdCollege (Id: C-61004)",
+            "Royal Heritage College Of Education (Id: C-57691)",
+            "Sai B Ed D El Ed College (Id: C-61819)",
+            "Sai College Of Education (Id: C-62057)",
+            "Shakuni Choudhary College Of Education (Id: C-60837)",
+            "Shams Teachers Training College (Id: C-59580)",
+            "SMRITI COLLEGE OF TECHNOLOGY AND MANAGEMENT (Id: C-56055)",
+            "SRI RAY BAHADUR RAMCHANDRA RAM LAXMI NARAYAN MANAGEMENT INSITUTE (Id: C-58285)",
+            "STCollege Of Education (Id: C-60103)",
+            "STeachers Training College (Id: C-60917)",
+            "Sundaram International Institute Of Higher Studies (Id: C-60427)",
+            "Swami Vivekanand BEd College (Id: C-61400)",
+            "Tauheed Institute Of Information Technology Katihar (Id: C-51500)",
+            "Uday Teachers Training College (Id: C-61007)",
+            "Vivekanand Institute Of Education (Id: C-60102)",
+            "JHA INSTITUTE OF TECHNOLOGY , KANKARBAGH , PATNA. ( KRC - 203 )",
+          ],
+          Affiliated: [
+            "Fatima Degree College, Patna",
+            "Shams Teachers Training College Sathi West Champaran",
+            "Royal Heritage College of Education RajashanVaishali",
+            "Nazirul Hasan Teachers Training College Sonhar Alauli Khagaria",
+            "Sai College Of Education Earki Jahanabad",
+            "Chandragupt Maurya College of Education Sadisopur Sarasat Patna",
+            "Maxford Teachers Training College Bhakhri Dhanarua Patna",
+            "Padum Lal Rupan Singh College, Koilwan Haspura Aurangabad",
+            "Baidyanath College of Education Milki Saur Chandipur Rajapur",
+            "Vivekanand Institute of Education Bigankikanagar Yarim Aurangabad",
+            "Buddha Multiplex Hotel and Management Gaya",
+            "Maa Bachchan Deve College Mansha Bigha Parwalpur Nalanda",
+            "Sundaram International Institute of Higher Studies Gauri Chak Patna",
+            "National B.Ed. College of Higher Education Mugichak Janipur Patna",
+            "GS Teachers Training College Ebrahimpur Awadhara Pavery Dhanarua Patna",
+            "Cresent School of Education and Training Baisakhwa Bettiah West Champaran",
+            "Kanti Devi Teacher Training College Daryapur Bhagatipur Neora Patna",
+            "Mahamaya College of Education Devkali Sarsauli Obra Aurangabad",
+            "Shakuni Choudhary College of Education Parwati Nagar Tarapur Munger",
+            "Dr. Trishuldhari Pandey Memorial College of Education Amera Nalanda",
+            "Ramuni Devi B.Ed Collee Manjurahi Aurangabad",
+            "Arabhaat Teacher Training College Rakasia, Dulhin Bazar Patna",
+            "Chanakaya Foundation B.Ed. College Bhojpur Koilwar",
+            "Baba Heera Singh Deepa Singh Jee Primary Teachers Training College",
+            "Uday Teachers Training College Makhdumpur Patna",
+            "S T College of Education Ahmad Raza Nagar",
+            "Prem;ata Madan Mohan College of Education Lodipur Nalanda",
+            "Gautam Budh Teachers Training College Baba Bakhtaur Banboriya Dham Na",
+            "Swami Vivekanand B.Ed. College Simulala Jamui",
+            "Sai B.Ed and D.El.Ed  College Siaruan Bikramganj Rohtas",
+            "Nagina Devi Teachers Training College Patel Nagar Jahanabad",
+            "Kaushalya Ramadhar Educational Trust Ramgarh Chenari Rohtas",
+          ],
+          "MMHAPU University Nodal ((Only for University to Opt))": "",
+        },
+        "Munger University Munger": {
+          Constituent: [
+            "BNM College, Barhaiya (Id: C-17660)",
+            "BRM College, Munger (Id: C-17640)",
+            "DSM College, Jhajha (Id: C-17624)",
+            "HS College, Haweli Kharagpur (Id: C-17655)",
+            "Jamalpur College, Jamalpur (Id: C-17630)",
+            "JMS College, Munger (Id: C-17644)",
+            "JRS College, Jamalpur (Id: C-17628)",
+            "KDS College, Gogri (Id: C-17663)",
+            "KKM College, Jamui (Id: C-17636)",
+            "KMD College, Parbatta (Id: C-17656)",
+            "Koshi College, Khagaria (Id: C-17643)",
+            "KSS College, Lakhisarai (Id: C-17646)",
+            "Mahila College, Khagaria (Id: C-17658)",
+            "RD & DJ College, Munger (Id: C-17662)",
+            "RD College. Sheikhpura (Id: C-17627)",
+            "RS College, Tarapur (Id: C-17617)",
+            "SKR College, Barbigha (Id: C-17637)",
+          ],
+          Affiliated: [
+            "Aryabhatta Teachers Training College",
+            "B.Ed. Teacher Training College",
+            "B.S. Vidhi Sansthan, Munger",
+            "Baba Heera Singh Deepa Singh Jee Primary Teachers Training College",
+            "Baidyanath College Of Education",
+            "Buddha Multiplex Hotel And Management",
+            "Chanakya Foundation",
+            "Chandragupta Maurya College Of Education",
+            "Cnb College, Hathiama, Sheikhpura",
+            "Crescent School Of Education And Training",
+            "Dr Trishuldhari Pandey Memorial College Of Education",
+            "Dr. Arvind Kumar College Bishanpur Chakai Jamui",
+            "Drs College, Sikandra, Jamui",
+            "Fatima Degree College, Patna",
+            "G.S. Teachers Training College",
+            "Gautam Budh Teachers Training College",
+            "Insan Degree College, Kishanganj",
+            "International College, Ghosaith",
+            "Jamui B.Ed College",
+            "Kanti Devi Teacher Training College",
+            "Kaushalya Ramadhar Educational Trust",
+            "Mahamaya College Of Education Vill-devkali, Po-sarsauli,ps-obra",
+            "Mahatma Gandhi Bed College",
+            "Mahila College, Barhaiya",
+            "Maxford Teachers Training College",
+            "Ms College, Alouli, Khagaria",
+            "Nagina Devi Teachers Training College",
+            "National B.Ed. College Of Higher Education",
+            "Nazirul Hasan Teachers Training College",
+            "Padum Lal Rupan Singh B.Ed. And D.El.Ed. College",
+            "Phalguni Prasad Yadav College Chakai, Jamui",
+            "Premlata Madan Mohan College Of Education",
+            "R. Lal College, Lakhisarai",
+            "Rahmani B.Ed. College, Munger",
+            "Rajmuni Devi B.Ed. College",
+            "Ramdhani Bhagat Degree College, Sangrampur",
+            "Royal Heritage College Of Education",
+            "S. T. College Of Education",
+            "S.P.S. College, Jamui",
+            "Sai B Ed D El Ed College",
+            "Sai College Of Education",
+            "Sai College Of Teachers Training ,Onama",
+            "Sanjay Gandhi Smarak Mahila College",
+            "Sbn College, Garhirampur, Munger",
+            "Shakuni Choudhary College Of Education",
+            "Shams Teachers Training College",
+            "Smt Ganga Devi Memorial College,sudamapur, Jamui",
+            "Sri Krishan Singh College, Lohanda",
+            "Ss College, Mehus, Seikhpura",
+            "Sundaram International Institute Of Higher Studies",
+            "Swami Vivekanand B.Ed College",
+            "Uday Teachers Training College",
+            "Vivekanand Vipf Institute Of Education",
+          ],
+          "Munger University Nodal ((Only for University to Opt))": "",
+        },
+        "Patna University Patna": {
+          Constituent: [
+            "Bihar National College (Id: C-22855)",
+            "College of Arts & Craft (Id: C-22852)",
+            "Magadh Mahila College (Id: C-22851)",
+            "Patna College (Id: C-22858)",
+            "Patna Law College (Id: C-22854)",
+            "Patna Science College (Id: C-22853)",
+            "Patna Training College (Id: C-35448)",
+            "Patna Women's College (Id: C-22850)",
+            "Vanijya Mahavidayala (Id: C-35447)",
+            "Women's Training College (Id: C-35449)",
+          ],
+          "PU University Nodal ((Only for University to Opt))": "",
+        },
+        "Patliputra University Patna": {
+          Constituent: [
+            "A.N.College (Id: C-12939)",
+            "A.N.S. College, Barh (Id: C-12883)",
+            "B.D.College (Id: C-12847)",
+            "B.S.College, Danapur (Id: C-12955)",
+            "College of Commerce, Arts & Science (Id: C-12943)",
+            "Ganga Devi Mahila College, Patna (Id: C-12878)",
+            "Governmnet Degree College, Rajgir Nalanda",
+            "J.D. Women's College (Id: C-12897)",
+            "J.N.L.College, Khagaul (Id: C-12919)",
+            "Kisan College, Sohsarai (Id: C-12907)",
+            "M.M.College, Bikram (Id: C-12962)",
+            "Mahila College, Khagaul (Id: C-12854)",
+            "MALTI DHARI COLLEGE (Id: C-12961)",
+            "Nalanda College, Biharshariff (Id: C-12858)",
+            "Nalanda Mahilla College, Biharshariff (Id: C-12850)",
+            "R.P.M. College, Patnacity (Id: C-12846)",
+            "Ram Krishna Dwarika Mahavidyalaya, Lohiya Nagar, Patna (Id: C-12902)",
+            "Ram Lakhan Singh Yadav College, Bakhtiyarpur (Id: C-12947)",
+            "Ram Ratan Singh College, Mokama (Id: C-12948)",
+            "S.G.G.S. college, Patnacity (Id: C-12917)",
+            "S.P.M.College, Udantpuri (Id: C-12893)",
+            "S.U.College,Hilsa (Id: C-12837)",
+            "Somavati Mehtab Das College (Id: C-12851)",
+            "Sri Arvind Mahila College (Id: C-12857)",
+            "Sri Gadadhar Acharya Janta College, Rambagh, Bihta (Id: C-12929)",
+            "T.P.S. College, Patna (Id: C-12925)",
+          ],
+          Affiliated: [
+            "Abc College Of Education",
+            "Al Fatima Educational Society",
+            "Allama iqbal College,Biharshariff",
+            "Arcade Business College Khagaul Patna",
+            "Arcade Business College Rajendra Nagar Patna",
+            "B R Degree College",
+            "B.B.M.B.G. Kanya Mahavidyalaya, Bihta",
+            "B.L.P. College, Masaurhi",
+            "B.R.S. Y. College, Kanhauli",
+            "Baldeo College Of Educatioal",
+            "Bibi Aasia Begum Teachers Training College",
+            "Bihar College Of Teacher Education",
+            "Bihar Institute Of Law",
+            "C.P. Verma College, Simari",
+            "Catalyst College",
+            "Catalyst Institute Of Management And Advance Global Excellence",
+            "D. P. Singh Institute Of Education",
+            "D.N. College, Masaurhi",
+            "Deo Nagina Teacher Training College",
+            "Deo Sharan Women's Evening College , Sohsarai , Nalanda",
+            "Dr C P Thakur College",
+            "Dr. R.R.M. College, Chandi",
+            "G.D.M. College, Harnaut",
+            "Gautam Teachers Training College",
+            "Government Degree College, Rajgir, Nalanda",
+            "Government Women's College, Gulzarbagh",
+            "Govt. Girl's College, Gardanibagh",
+            "Himalaya College Of Pharmacy",
+            "Indian Institute Of Health Education And Research",
+            "International Business College Patna",
+            "Islamia Teachers Training (B.Ed.) College",
+            "J P College Of Pharmacy",
+            "J. P. Shikshak Prashikshan Mahavidyalaya",
+            "J.K.College, Fatehpur",
+            "Jp College Of Education",
+            "K.P.S. College, Nadwan",
+            "K.S. College Of Professional Education",
+            "K.S.T. College, Sohsarai",
+            "Kamleshwari Prasad Singh Teacher Training College",
+            "Krishna College Of Teachers Education",
+            "L S T Gramin College Aungaridham , Nalanda",
+            "L.N.M. College Of Higher Education",
+            "L.P.Sahi College",
+            "L.S.T. College, Auragridham",
+            "Leeds Training College",
+            "Leelawati College",
+            "M. G. M. College",
+            "M. S. Institute Of Education",
+            "M.B. College",
+            "M.M.College, Chandi",
+            "Maa Bacchan Devi Teacher Training College",
+            "Maa Tara Institute Of Technical Education",
+            "Maa Vidya Maa Kusum Teachers Training College",
+            "Mahabodhi Mahavidyalaya, Nalanda",
+            "Mahatma Budh Hiraman College",
+            "Mata Ashapuri College, Pyarepur, Pawapuri, Nalanda",
+            "Mata Sushila Institute Of Education",
+            "Mother S International Teachers Training Academy",
+            "Nalanda Mahila Shikshak Prashikshan Mahavidyalaya",
+            "Nalanda Shodh Sansthan Avam Mahavidyalaya",
+            "Nalanda T T College, Biharsharif",
+            "National Teachers Training College",
+            "Nezamia College Of Education",
+            "Oriental College,patnacity",
+            "Oxford Business College",
+            "P.L.S.College, Masaurhi",
+            "P.M.S. College, Biharsharif",
+            "P.N.K. College, Achua",
+            "Patliputra Teachers Training College",
+            "Patna Muslim Science College",
+            "Pratibha Pallavan Teachers Training College",
+            "R P S Teachers Training College",
+            "R. P. S. Law College",
+            "R.L.S.Y. College, Anisabad",
+            "R.L.S.Y. College, Biharshariff",
+            "R.Lal College, Alinagar",
+            "R.P.College Datiana, Bikram",
+            "R.P.S. College",
+            "R.P.S. College, Harnaut",
+            "R.P.S.M. College",
+            "R.R.P. College, Bhargawan",
+            "Raghunandan Teachers Training College",
+            "Rajgir College, Rajgir",
+            "Ram Dei Ram Chandra Memorial Shikshan Sansthan",
+            "Ram Kripal Singh Teacher Training College, Araut",
+            "Ram Rup Prasad B.Ed. College",
+            "Ramlakhan Singh Yadav College Paliganj Patna",
+            "Rural Teachers Training College",
+            "S S S Agrawal Prabhandhan Evam Takniki Mahavidyala",
+            "S. A. College Of Eduation",
+            "S.B.R. College, Barh",
+            "S.K.V.M. College, Fatuha",
+            "S.P.College, Hilsa",
+            "Sanjay Sinha Bed College",
+            "Sattar Memorial College Of Education",
+            "Satyam International Institute Of Higher Studies",
+            "Scholars College Of Education",
+            "Shanti Memorial College Of Education",
+            "Shivam College Of Higher Studies",
+            "Shivam Teachers Training College",
+            "Shivpari Devi Teacher S Training College",
+            "Shri Ram Narayan College",
+            "Sir Ganesh Dutta Memorial College, Patna",
+            "Snatak College Islampur",
+            "Soghra College, Biharsharif",
+            "Sukhdeo Narayan Lal Bahadur Sita Ram Memorial B.Ed College",
+            "Sushila Sujata B.Ed. College",
+            "Syed Nehal Ahsan Evening College, Barh Patna",
+            "Tagore Teachers Training College",
+            "Takshila College Of Education",
+            "Tapindu Institute Of Higher Studies",
+            "Trimurti Mahavidyalaya, Ismailpur, Patna",
+            "V S Group Of Colleges",
+            "Vardhman Mahavir College Pawapuri",
+            "Vidya College Of Professional Studies",
+            "Vidya Niketan Teacher Training College, Charman,masaurhi",
+            "Vikramaditya College Of Education",
+            "Vitthal College Of Education",
+          ],
+          "PPU University Nodal ((Only for University to Opt))": "",
+        },
+        "Purnea University, Purnia": {
+          Constituent: [
+            "Araria College Araria",
+            "D.S. College, Katihar (Id: C-29628)",
+            "Forbesganj College, Forbesganj (Id: C-29606)",
+            "G.L.M. College, Banmankhi (Id: C-29627)",
+            "K.B. Jha College, Katihar (Id: C-29600)",
+            "M.J.M. Mahila College, Katihar (Id: C-29631)",
+            "M.L. Arya College, Kasba (Id: C-29612)",
+            "Marwari College, Kishanganj (Id: C-29605)",
+            "Nehru College, Bahadurganj (Id: C-29601)",
+            "Purnea College, Purnia (Id: C-29625)",
+            "Purnia Mahila College, Purnia (Id: C-29584)",
+            "R.D.S. College, Salmari (Id: C-29640)",
+            "R.L. College, Madhawnagar (Id: C-29609)",
+            "Sub Divisional Govt Degree College Baisi  Purnea (Id: C-62956)",
+            "SUB DIVISIONAL GOVT DEGREE COLLEGE DHAMDAHA PURNEA (Id: C-62681)",
+          ],
+          Affiliated: [
+            "A. M. Degree College, Araria (Id: C-29590)",
+            "Anandi Janki Mahila College, Banmankhi (Id: C-29574)",
+            "B. D. College, Barsoi (Id: C-29633)",
+            "B. M. College, Barari (Id: C-29620)",
+            "B.M.T. Law College, Purnia (Id: C-29586)",
+            "B.N.C. College, Dhamdaha (Id: C-29604)",
+            "Balrampur College, Balrampur (Id: C-29619)",
+            "C. K. M. Law College, Araria (Id: C-29591)",
+            "J.D.S.S. Mahila College, Forbishang (Id: C-29581)",
+            "Kalawati Snatak Mahavidyalaya, Raniganj (Id: C-29610)",
+            "Katihar Teaches Training College, Sirsa (Id: C-55075)",
+            "Khawaja Shahid Hussain Primary Teacher's Training College, Nista (Id: C-59486)",
+            "M. H. A. N. D. College, Thakurganj (Id: C-29622)",
+            "M.F.A.A.T.T. College, Rambagh (Id: C-29635)",
+            "M.I.T., Rambagh (Id: C-29598)",
+            "M.L.D.P.K.Y College, Araria (Id: C-29576)",
+            "Millia Kaniz Fatma Womens Teachers Training College (Id: C-61416)",
+            "Millia Teachers Training College Radhanagar Kasba Purnea (Id: C-61408)",
+            "N.D. College, Rambagh (Id: C-29618)",
+            "Parmanand Sabitri Degree College, Harda (Id: C-29588)",
+            "Pepople's College, Araria (Id: C-29643)",
+            "R. K. Saha Women's College, Kishanganj (Id: C-29595)",
+            "R. Y. Manihari College, Manihari (Id: C-29597)",
+            "R.K.K. College, Purnia (Id: C-29592)",
+            "S. D. Law College, Katihar (Id: C-29611)",
+            "S. R. C. College, Katihar (Id: C-29594)",
+            "S.N.S.Y. Degree College, Rambagh (Id: C-29613)",
+            "Seemanchal Minority B.Ed. College Katihar (Id: C-51501)",
+            "Srp Teachers Training College Purnea (Id: C-61407)",
+            "Swadeshi College Of Education, Purnea (Id: C-55020)",
+            "Y.N.P.Degree College, Raniganj (Id: C-29575)",
+            "Millia Kishanganj College of Engineering and Technology, Variadangi Kishanganj (Id: C-29575)",
+          ],
+          "Purnea University Nodal ((Only for University to Opt))": "",
+        },
+        "T.M.B.U Bhagalpur": {
+          Constituent: [
+            "B.N. College, Bhagalpur (Id: C-17619)",
+            "GB College, Naugachia (Id: C-17649)",
+            "JP College, Narayanpur (Id: C-17635)",
+            "MAM College, Naugachia (Id: C-17651)",
+            "Marwari College, Bhagalpur (Id: C-17620)",
+            "Murarka College, Sultanganj (Id: C-17645)",
+            "PBS College, Banka (Id: C-17629)",
+            "S.M. College, Bhagalpur (Id: C-17650)",
+            "Sabour College, Sabour (Id: C-17641)",
+            "SSV College, Kahalgaon (Id: C-17623)",
+            "T.N.B. College, Bhagalpur (Id: C-17621)",
+            "TNB Law College, Bhagalpur (Id: C-17648)",
+          ],
+          Affiliated: [
+            "A.K.Gopalan Degree College (Id: C-61208)",
+            "Adityanath Memorial College (Id: C-65541)",
+            "Adwaita Mission Training College (Id: C-52924)",
+            "Arjun College Of Education (Id: C-60255)",
+            "B. N. College Of Education (Id: C-58287)",
+            "Banarsilal Saraf Commerce College, Naugachia (Id: C-17626)",
+            "C M College, Mandar Bounsi (Id: C-17615)",
+            "College Of Teacher Education, Bhagalpur (Id: C-49109)",
+            "D.L.S Shiksha Mahavidhyalay (Id: C-60578)",
+            "Deepnarayan Memorial Teacher Training College (Id: C-61213)",
+            "Dns College, Bhusia, Rajoun (Id: C-17657)",
+            "Lnbj Mahila College, Bhramarpur (Id: C-17642)",
+            "M.M. College, Bhagalpur (Id: C-17654)",
+            "Madhavan Memorial College Of Education (Id: C-57707)",
+            "Mahadeo Singh College, Bhagalpur (Id: C-17653)",
+            "Mahatma Gandhi Sikshak Prasikshan Mahavidyalya (Id: C-52014)",
+            "Mod Narayan Mahavidyalaya Amba Shahkund Bhagalpur (Id: C-65814)",
+            "New Horizon College Of Education (Id: C-59528)",
+            "Pna Science College (Id: C-65521)",
+            "Puranmal Bajoria Teachers Training College (Id: C-54630)",
+            "S C S Nagar Banka (Id: C-50649)",
+            "S. Jhunjhunwala Mahila College, Bhagalpur (Id: C-17632)",
+            "Satyadev Mahavidyalaya Gouripur (Id: C-65761)",
+            "Sdmy Degree College, Dhoraiya (Id: C-17616)",
+            "Sindhu College Of Education (Id: C-65517)",
+            "Sri Krishna Manorama Shikshak Prashikshan Mahavidyalaya (Id: C-59297)",
+            "Ssps College, Shambhuganj (Id: C-17664)",
+            "Tarar College, Tarar (Id: C-17647)",
+            "Teachers Training College (Id: C-48047)",
+            "V. B. College Of Education, Bhagalpur (Id: C-58288)",
+          ],
+          "TMBU University Nodal ((Only for University to Opt))": "",
+        },
+        "V.K.S.U Ara": {
+          Constituent: [
+            "Anjabit Singh College, Bikramganj (Id: C-27130)",
+            "Dharichanna kuri College, Dumraon (Id: C-27149)",
+            "Gram Bharti College, Ramgarh (Id: C-27121)",
+            "H.D. Jain College, Ara (Id: C-27145)",
+            "J.L.N. College, Dehri-on-sone (Id: C-27146)",
+            "Jagjiwan College, Ara (Id: C-27147)",
+            "M.M. Mahila College, Ara (Id: C-27139)",
+            "M.V. College, Buxar (Id: C-27158)",
+            "Maharaja College, Ara (Id: C-27122)",
+            "Mahila College, Dalmianagar (Id: C-27132)",
+            "Rohtas Mahila College, Sasaram (Id: C-27164)",
+            "S.B. College, Ara (Id: C-27161)",
+            "S.P. Jain College, Sasaram (Id: C-27126)",
+            "S.V.P. College, Bhabua (Id: C-27106)",
+            "Sachchidanand College, Shahmal Khaira-deo, Rohtas (Id: C-27103)",
+            "Shershah College, Sasaram (Id: C-27138)",
+            "Sri Shankar College, Sasaram (Id: C-27125)",
+            "Sub Divisional Govternment Degree College Nauhatta Rohtas",
+          ],
+          Affiliated: [
+            "ABR College Sasaram Rohtas (Id: C-27113)",
+            "Al-hafeez College, Ara (Id: C-35763)",
+            "Apsam College Of Education, Utarwari Jungal, Jagdishpur (Id: C-50007)",
+            "Arbind Teachers Training College, Araura,dularur,ara, Bhojpur (Id: C-59204)",
+            "B K S College (Id: C-65467)",
+            "B.Ed. College Parsathua, Rohtas (Id: C-59909)",
+            "B.N. College, Indour (Id: C-27134)",
+            "B.P.J.P.S. Mahila College, Rajpur (Id: C-27109)",
+            "B.S. College, Hata Chenari (Id: C-27099)",
+            "Bhupesh Gupta College, Bhabua, Kaimur (Id: C-27151)",
+            "Bihar College Of Education, Gidha (Id: C-50005)",
+            "Brahmarshi Sahjanand Sarashwati College, Bachari-piro, Bhojpur (Id: C-27107)",
+            "C.C.S. College, Rajpur (Id: C-27135)",
+            "Chanakya Academy Mahila Mahavidyalay, Sarenja, Buxar (Id: C-68203)",
+            "Chaudhary Charan Singh Evening College, Bhagiratha, Narwar, Kochas, Rohtas (Id: C-68924)",
+            "D D College,dhanupra,bhojpur (Id: C-68514)",
+            "D.K.M. College, Dumri (Id: C-27119)",
+            "D.S.S.V. College, Simari (Id: C-27117)",
+            "Dharikshan Shanti Meera Sidhnath Degree Mahavidyalaya Kulharia (Id: C-64464)",
+            "Dharikshan Singh Teachers Training College (Id: C-56053)",
+            "Dr. K.K. Mandal College, Jagdishpur (Id: C-27144)",
+            "Dr. K.K. Mandal Mahila College, Buxar (Id: C-27108)",
+            "Durgawati Mahavidyalaya, Bichhiya, Dumari, Kaimur (Id: C-68209)",
+            "G.D. Mishra Institute Of Higher Studies (Id: C-56052)",
+            "Girish Narayan Mishra College, Parsathua,rohtas (Id: C-27114)",
+            "Gita Pradeep College Of Higher Education (Id: C-68204)",
+            "Guru Prakash B.Ed. College (Id: C-56059)",
+            "Guru Prakash College, Kekadha, Kilani Kaimur (Id: C-68207)",
+            "H.N.S.B. Janta College, Dhansoi (Id: C-35762)",
+            "I.D.B.P.S.College, Garh Nokha (Id: C-27143)",
+            "I.T.S.M. College, Bikramganj (Id: C-27118)",
+            "Indra Parshuram Singh Mahavidyalaya, Maidan, Kala Belaon, Kaimur (Id: C-68205)",
+            "J. D. S. Degree College (Id: C-65482)",
+            "J.M. College,sakri Kudra (Id: C-27127)",
+            "Jagjiwan College, Dehri-on-sone (Id: C-27154)",
+            "Jan Sahkari D.C. Barap, Garahni (Id: C-27100)",
+            "Jannayak Karpoori Thakur Vidhi Mahavidyalaya, Buxar (Id: C-27115)",
+            "K D College Of Education (Id: C-60274)",
+            "K.N. Singh College, Itarhi, Buxar (Id: C-27153)",
+            "L.B.T. College, Buxar (Id: C-27098)",
+            "M.D.R. Patel Degree Mahila College, Bhabua, Kaimur - (Bihar) (Id: C-27141)",
+            "M.G. College, Leharabad (Id: C-35765)",
+            "Maharana Pratap College, Mohania (Id: C-27124)",
+            "Maharshi Chyawan College, Akhauripur Gola, Chousa, Buxar (Id: C-27102)",
+            "Mata Manjharo Ajab Dayal Singh Mahavidyalaya (Id: C-64110)",
+            "Mata Manjharo Ajabdayal Singh Teachers Training College, Dulaour, Jagdishpur (Id: C-50006)",
+            "Matri Prem College Of Education (Id: C-56060)",
+            "P.C. College, Buxar (Id: C-27104)",
+            "Parmarth Institute Of Teacher's Education (Id: C-36592)",
+            "Patel College,ghusiakhurd, Bikramganj (Id: C-27160)",
+            "Pr. B.P. Singh College, Simri (Id: C-27133)",
+            "Prahalad Rai Teachers Training College (Id: C-60181)",
+            "R S M Degree College, Santpur, Ara, Bhojpur (Id: C-68206)",
+            "R.K.S. College, Dalmianagar (Id: C-27148)",
+            "R.M. Devi C.D. Rai College, Nuwan, Kochas (Id: C-35766)",
+            "R.N. Sah Sarvodaya College, Ganjbharsara (Id: C-36594)",
+            "R.S. College Of Education, Bare, Kaimur (Id: C-52309)",
+            "R.S. College, Tilouthu (Id: C-27137)",
+            "R.S.D.College, Bhagwanpur (Id: C-27136)",
+            "Ram Nagina Singh College (Id: C-65401)",
+            "Rohtas Vidhi Mahavidyalaya, Sasaram (Id: C-27156)",
+            "S.M. College, Dumraon (Id: C-27110)",
+            "S.S.B.M. College, Jagdishpur (Id: C-35764)",
+            "S.S.T. College Sasaram (Id: C-27159)",
+            "S.T.S.M. College, Panwari (Id: C-27116)",
+            "Sabhapati Mishra Institute Of Education (Id: C-64108)",
+            "Saheed Ravikant Memorial B.Ed. College, Dalsagar, Buxar (Id: C-52308)",
+            "Sarvoday B.Ed. College (Id: C-56056)",
+            "Seema Kumari College, Itarhi Road, Turkpurwa, Buxar (Id: C-70209)",
+            "Shaheed Sanjay Singh Mahila College, Bhabua, Kaimur (Id: C-27152)",
+            "Shakuntalam Institute Of Teachers Education, Kirhindih, Sasaram, Rohtas (Id: C-59907)",
+            "Sheopujan Shastri Samta College, Dinara, Rohtas (Id: C-40806)",
+            "Sidheshwar College Of Teachers Education, Meyari, Bazar, Rohtas (Id: C-59908)",
+            "Sidhnath Sah College, Tiyara, Rajpur, Buxar (Id: C-70211)",
+            "T.S.I. Mahila College, Ara (Id: C-27155)",
+            "V.K.S. College, Dharupur (Id: C-27142)",
+            "V.K.S. Mahila College, Kashi Mednipur (Id: C-36593)",
+            "Veer Kunwar Singh College, Jagdishpur, Bhojpur (Id: C-68208)",
+            "PMJ College Ara (Id: C-27163)",
+          ],
+          "VKSU University Nodal ((Only for University to Opt))": "",
+        },
+        "Aryabhatta Knowledge University Patna": {
+          Affiliated: [
+            "Acharya Sudarshan B.Ed. College Vill & P.O. Mubarakpur, P.S. Majorganj, Dist. Sitamarhi-843332.",
+            "Adwaita Mission Institute of Technology",
+            "Amaltas College of Education Vill- Indrapuri, P.O. Tilothu, Rohtas- 821308.",
+            "Ambedkar Institute of Higher Education",
+            "Asian Institute of Management and Information Technology Kankarbagh Patna (AIMIT) (KRC-151)",
+            "Azmat Institute of Technology",
+            "Bhagwati Singh Memorial B.Ed. Mahavidyalaya Vill- Jigna, Post- Goi, Chand, Dist. Kaimur.",
+            "Bhuvan Malti College of Education, Vill- Basantpur Bada Tola, Post- Rupdih, Chatauni-Dhaka Road, Motihari, East Champaran-845401.",
+            "Bradford International Business School",
+            "Chaitanya International Business College",
+            "Champaran College of Professional Education",
+            "Chanakya College of Higher Studies",
+            "Chanakya Foundation B. Ed. College At- Chanakya Nagar, Bailey Road to Khagaul Nahar Road, P.O. Khagaul, Dist. Patna- 801105.",
+            "Chanakya Institute of Management and Higher Studies",
+            "Cimage Professional college",
+            "Deshratna Rajendra Prasad Shikshak Prashikshan Mahavidyalaya, Bihar Vidyapeeth, Sadaquat Ashram,Patna-10. Phone: 0612-2262819.",
+            "Dhanarua Training Institute",
+            "Divine Institute of Management & Studies Zivadei, Siwan",
+            "Dr. Kumar Educational Institution",
+            "Dr. Zakir Hussain Institute for Non formal & Continuing Education",
+            "Exalt College of Engineering",
+            "Fatuha Professional Training Institute",
+            "Ganga Global Institute of Management Studies",
+            "Ganga Global Institute of Teacher Education N.H. 31, Vill-Ramzanpur (Near Ganga Dairy Ltd.), Dist.Begusarai- 851129.",
+            "Gautam College Bhaganbigha, P.O- Sohsarai, Biharsharif, Nalanda- 803118",
+            "Gautam College of Education Vill- Kamalpur, P.O. Bhaishmara, Tehsil/Taluka- Garkha Chapra, Dist. Saran- 841311.",
+            "Global Foundation for Higher Studies, North lane, Pillar no. 58, Raja Bazar Pul, Seikhpura, Patna - 800014",
+            "Govt. Women’s College (B.Ed. College) Gardanibagh, P.S. Gardanibagh, Patna-800 002.",
+            "Gyan Prakash Swami Vivekanand Teachers Training B.Ed. College Vill- Hardas Bigha, P.O. Baikatpur, Khushrupur, Dist. Patna- 803202.",
+            "Harakhdeo Singh College of Education Ramanuj Bag, Khudaganj, Dist.Nalanda-801303.",
+            "Harinarain Singh Institute of Teacher’s Education Gaurakshini, P.S. Sasaram, Dist. Rohtas- 821115.",
+            "Harinarain Singh Institute of Teacher’s Education Vill + P.O. Gaurakshini, P.S. Sasaram, Dist. Rohtas- 821115.",
+            "Himalaya College of Professional Education",
+            "Himalaya Teacher’s Training College Ebrahimpur, Awadhara, P.O. Dhanarua, Dist. Patna-804451.",
+            "Himalaya Teacher’s Training College Vill- Ebrahimpur, Awadhara, P.O. Dhanarua, Dist. Patna-804451.",
+            "Imperial College of Business & Science",
+            "Indian Institute of Business Management",
+            "Indrakali Ramji Singh B.Ed. College Vill + Post- Koyladeva, Hathua, Dist. Gopalganj-841438.",
+            "Institute of Management and Planning & Advanced Computer Training (IMPACT),",
+            "International School of Management",
+            "Janardan Prasad Singh Teacher’s Training College Vill- Bangra, Daudpur, Manjhi Road, Manjhi, Saran-841205",
+            "Jinvani Management College",
+            "Kamla Bhubneswer B.Ed. College P.O. Chandour, P.S.Bhagwanpur, Dist. Begusarai- 851 133.",
+            "KGI School of Education (Id: C49579)",
+            "Kingway Technical Institute At- Kularia, Karamnasha, Durgawai, Kaimur-821105",
+            "Kusumraj Educational Institution",
+            "Lalit Naryan Mishra Institute of Economic Development & Social Change",
+            "Maa Aranaya Devi B. Ed. College Ara Buxar Road, P.O.Bampali, Dist. Bhojpur-802301",
+            "Magadh Professional Institute",
+            "Maitreya College of Education & Management N.S.1(P), EPIP Campus, Hazipur Industrial Area, Hazipur, Vaishali-844102.",
+            "Maryada Purushottam College of Education Chhilhari, Block- Dumraon, Dist. Buxar-802119",
+            "Mata Sita Sundar College of Education",
+            "MGM College",
+            "Mithila Chitrakala Sansthan",
+            "Mona Collegeof Professional Education",
+            "Mother Teressa Management College",
+            "Moti babu Institute of Technology",
+            "MSJ College of Professional Education",
+            "Mundeshwari College for Teacher Education Vill & P.O. Sarari, Danapur, Patna-801105.",
+            "Muzaffarpur College of Professional Education",
+            "National Institute of Health Education& Research",
+            "Netaji subhas Institute of Technology",
+            "Oxford Business College",
+            "Patliputra College of Professional Education",
+            "R.L. Mahto Institute of Education Rampur Jalalpur, Dalsing Sarai, Samastipur-848114.",
+            "R.S.Sharda Devi Education College Nenaha Hajipur Vaishali-844124.",
+            "Radhakrishnan College of Education Shahpur Karanja Bikram Patna-801109.",
+            "Radhakrishnan College of Education At- Shahpur, P.O. Karanja, P.S. Bikram, Dist. Patna-801109.",
+            "Raj Mata Madhuri Devi Teacher’s Training College House No.302, Awas Board, P.O. Koshi College, Dist. Khagaria-851205.",
+            "Rajan Mamta Degree Collee",
+            "Ranjana Institute",
+            "Reliable College of Professional Education",
+            "S. S. College of Teacher Education P.O. Neora, Opp. Neora Railway Station, Dist. Patna-801113.",
+            "Satyam International Institute of Techonology and Management",
+            "Seemanchal Degree College",
+            "Shukla College of Professional Education",
+            "Sityog institute of technology",
+            "Siwan Engineering & Technical Institute",
+            "St. Xaviers College of Education, P.O.Digha Ghat, Dist. Patna-800 011.",
+            "St. xaviers college of Management and Technology",
+            "Subhwanti Institute of Education",
+            "Subhwanti Institute of Professional Education",
+            "Surendra B.Ed. Teachers Training College Surendra Nagar, Neura Shivala More, Khagaul, Patna-801113",
+            "Tapeshwar Singh Teacher’s Training College, Vill & P.O. Kayam Nagar, Ara, Dist. Bhojpur-802514.",
+            "Tarkeshwar narain Agrawal College of Education Harigaon Jagdishpur Ara",
+            "Trident B.Ed. College MUP III (P), Giddha Industrial Growth Centre, Vill+P.O. Giddha, Arrah, Dist.Bhojpur-802314.",
+            "Usha Institute of Professional Education",
+            "Varma College of Professional Education",
+            "Veerayatan B.Ed. College Pawapuri, Dist. Nalanda-803115. Phone:06112-255240/ 255385.",
+            "Vidya Vihar Institute of Technology",
+          ],
+          "AKU University Nodal ((Only for University to Opt))": "",
+        },
+
+        // Add mappings for other universities
+      };
+
+      // Populate the college select dropdown with options based on the selected college type
+      var colleges = collegeMap[university][collegeType];
+      if (colleges) {
+        colleges.forEach(function (college) {
+          var option = document.createElement("option");
+          option.value = college;
+          option.text = college;
+          collegeSelect.appendChild(option);
+        });
+      }
+
+      // Show the college name dropdown
+      document.getElementById("college_name_div").style.display = "block";
+    });
+</script>
+{% endblock content %}

@@ -1,13 +1,12 @@
 from django.shortcuts import render, redirect
 from .forms import RegisterForm, QuestionnaireForm, CoursesInformationForm
-from .models import Questionnaire, CustomUser, CourseInformation
+from .models import Questionnaire, CustomUser
 from django.contrib import messages
 from django.contrib.auth import login
 from .forms import QuestionnaireForm
 from django.db.models import Sum, Count, F, Q, ExpressionWrapper, FloatField, IntegerField, Case, When
 import csv
 from django.http import HttpResponse
-import pandas as pd
 
 
 

@@ -1,0 +1,199 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <style>
+      .datepicker {
+        display: block;
+        position: absolute;
+        border-radius: 15px;
+        top: 80px;
+        left: 1060px;
+        width: 90px;
+      }
+      .datepicker2 {
+        display: block;
+        position: absolute;
+        border-radius: 15px;
+        top: 80px;
+        left: 980px;
+        left: 1150px;
+        width: 90px;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monitoring Form</title>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="overlay"></div>
+      <nav class="nav">
+        <div class="nav-logo">
+          <p>शिक्षा विभाग, बिहार (Higher Education Monitoring for Colleges)</p>
+        </div>
+        <div class="nav-menu" id="navMenu">
+          <ul>
+            <li></li>
+            <li>
+              <a href="{% url 'generate_data' %}" id="data-link" class="link">Data</a>
+            </li>
+            <li>
+              <a href="{% url 'generate_R1' %}" id="r1-link" class="link">R1</a>
+              <input type="text" id="datepicker" class="datepicker" />
+            </li>
+            <li>
+              <a href="{% url 'generate_R3' %}" id="r3-link" class="link">R3</a>
+              <input type="text" id="datepicker2" class="datepicker2" />
+            </li>
+            <li>
+              <a href="{% url 'signin' %}" class="link">Start Filling</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    {% for message in messages %}
+    <div
+      class="alert alert-{{message.tags}}"
+      role="alert"
+      style="margin-top: 30px"
+    >
+      <h5>{{message}}</h5>
+    </div>
+    {% endfor %} {% block content %}
+    <h1>Hello World</h1>
+    {% endblock content %}
+  </body>
+  <script>
+    $(document).ready(function () {
+      $("#datepicker").datepicker({
+        dateFormat: "yy-mm-dd", // Ensures the date is selected in the correct format
+      });
+      $("#datepicker2").datepicker({
+        dateFormat: "yy-mm-dd", // Ensures the date is selected in the correct format
+      });
+      $("#data-link").click(function (event) {
+          event.preventDefault(); // Prevent default link behavior
+          window.location.href = '{% url "generate_data" %}';
+      });
+
+      $("#r1-link").click(function (event) {
+        event.preventDefault(); // Prevent default link behavior
+
+        // Get the selected date from the datepicker
+        var selectedDate = $("#datepicker").val();
+
+        // Check if a date is selected
+        if (selectedDate) {
+          // Send an AJAX request to the generate_R1 URL with the selected date
+          $.ajax({
+            type: "GET",
+            url: '{% url "generate_R1" %}',
+            data: { user_date: selectedDate },
+            success: function (response) {
+              // Create a hidden link and trigger the download
+              var hiddenElement = document.createElement("a");
+              hiddenElement.href =
+                "data:text/csv;charset=utf-8," + encodeURI(response);
+              hiddenElement.target = "_blank";
+              hiddenElement.download = "R1_" + selectedDate + ".csv";
+              hiddenElement.click();
+            },
+            error: function (xhr, status, error) {
+              console.error("Error:", error);
+              alert("Failed to download CSV file.");
+            },
+          });
+        } else {
+          alert("Please select a date.");
+        }
+      });
+      $("#r3-link").click(function (event) {
+        event.preventDefault(); // Prevent default link behavior
+
+        // Get the selected date from the datepicker
+        var selectedDate = $("#datepicker2").val();
+
+        // Check if a date is selected
+        if (selectedDate) {
+          // Send an AJAX request to the generate_R1 URL with the selected date
+          $.ajax({
+            type: "GET",
+            url: '{% url "generate_R3" %}',
+            data: { user_date: selectedDate },
+            success: function (response) {
+              // Create a hidden link and trigger the download
+              var hiddenElement = document.createElement("a");
+              hiddenElement.href =
+                "data:text/csv;charset=utf-8," + encodeURI(response);
+              hiddenElement.target = "_blank";
+              hiddenElement.download = "R3_" + selectedDate + ".csv";
+              hiddenElement.click();
+            },
+            error: function (xhr, status, error) {
+              console.error("Error:", error);
+              alert("Failed to download CSV file.");
+            },
+          });
+        } else {
+          alert("Please select a date.");
+        }
+      });
+      $("#datepicker").change(function () {
+        var formattedDate = $(this).val(); // Get the value in 'YYYY-MM-DD' format directly
+
+        console.log("Formatted Date Sent to Server:", formattedDate); // Check the formatted date
+
+        $.ajax({
+          type: "GET",
+          url: '{% url "generate_R1" %}',
+          data: { user_date: formattedDate },
+          success: function (response) {
+            console.log("hi");
+            var hiddenElement = document.createElement("a");
+            hiddenElement.href =
+              "data:text/csv;charset=utf-8," + encodeURI(response);
+            hiddenElement.target = "_blank";
+            hiddenElement.download = "R1" + selectedDate + ".csv";
+            hiddenElement.click(); // Update the DOM with the response
+          },
+          error: function (xhr, status, error) {
+            console.error("Error:", error);
+          },
+        });
+      });
+      $("#datepicker2").change(function () {
+        var formattedDate = $(this).val(); // Get the value in 'YYYY-MM-DD' format directly
+
+        console.log("Formatted Date Sent to Server:", formattedDate); // Check the formatted date
+
+        $.ajax({
+          type: "GET",
+          url: '{% url "generate_R3" %}',
+          data: { user_date: formattedDate },
+          success: function (response) {
+            console.log("hi");
+            var hiddenElement = document.createElement("a");
+            hiddenElement.href =
+              "data:text/csv;charset=utf-8," + encodeURI(response);
+            hiddenElement.target = "_blank";
+            hiddenElement.download = "R3" + selectedDate + ".csv";
+            hiddenElement.click(); // Update the DOM with the response
+          },
+          error: function (xhr, status, error) {
+            console.error("Error:", error);
+          },
+        });
+      });
+    });
+  </script>
+</html>

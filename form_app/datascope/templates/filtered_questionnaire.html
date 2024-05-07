@@ -1,0 +1,10 @@
+{% extends "base.html" %} {% block content %}
+<div id="filtered_data">
+    <ul>
+        {% for item in filtered_data %}
+            <li>{{ item.date }} - {{ item.email }} - {{ item.university_name }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endblock content %}

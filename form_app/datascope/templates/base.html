@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <style>
+      #home {
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 22px;
+        color: #fff;
+        padding-bottom: 15px;
+        margin: 0 15px;
+      }
+      #home:hover,
+      .active {
+        border-bottom: 2px solid #fff;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monitoring Form</title>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="overlay"></div>
+      <nav class="nav">
+        <div class="nav-logo">
+          <p>शिक्षा विभाग, बिहार (Higher Education Monitoring for Colleges)</p>
+        </div>
+        <div class="nav-menu" id="navMenu">
+          <ul>
+            <li>
+              <a href="{% url 'signin' %}" id="home" class="link"
+                >Start Filling</a
+              >
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    {% for message in messages %}
+    <div
+      class="alert alert-{{message.tags}}"
+      role="alert"
+      style="margin-top: 30px"
+    >
+      <h5>{{message}}</h5>
+    </div>
+    {% endfor %} {% block content %}
+    <h1>Hello World</h1>
+    {% endblock content %}
+  </body>
+</html>
