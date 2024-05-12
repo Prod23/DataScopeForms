@@ -14,25 +14,46 @@
       .datepicker {
         display: block;
         position: absolute;
-        border-radius: 15px;
-        top: 80px;
-        left: 1060px;
-        width: 90px;
+        border-radius: 1.5vh;
+        top: 8vh;
+        left: 70.3vw;
+        width: 10vh;
+      }
+      .datepicker3 {
+        display: block;
+        position: absolute;
+        border-radius: 1.5vh;
+        top: 8vh;
+        left: 74.5vw;
+        width: 10vh;
       }
       .datepicker2 {
         display: block;
         position: absolute;
-        border-radius: 15px;
-        top: 80px;
-        left: 980px;
-        left: 1150px;
-        width: 90px;
+        border-radius: 1.5vh;
+        top: 8vh;
+        left: 78vw;
+        width: 10vh;
+      }
+      .universitypicker {
+        display: flex;
+        position: absolute;
+        border-radius: 1.5vh;
+        top: 11vh;
+        left: 72vw;
+        width: 20vh;
+        padding-top: 0.2 vh;
+        padding-bottom: 0.2 vh;
+        text-align: center;
       }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Monitoring Form</title>
   </head>
   <body>
+    <div class="background-container">
+      <div class="background-image"></div>
+    </div>
     <div class="wrapper">
       <div class="overlay"></div>
       <nav class="nav">
@@ -41,39 +62,70 @@
         </div>
         <div class="nav-menu" id="navMenu">
           <ul>
-            <li></li>
             <li>
-              <a href="{% url 'generate_data' %}" id="data-link" class="link">Data</a>
+              <a href="{% url 'generate_data' %}" id="data-link" class="link"
+                >Data</a
+              >
             </li>
             <li>
               <a href="{% url 'generate_R1' %}" id="r1-link" class="link">R1</a>
               <input type="text" id="datepicker" class="datepicker" />
             </li>
             <li>
+              <a href="#" id="r2-link" class="link">R2</a>
+              <input type="text" id="datepicker3" class="datepicker3" />
+              <select
+                name="universitypicker"
+                id="universitypicker"
+                class="universitypicker"
+              >
+                <option value="">Select University</option>
+                <!-- <option value="admin">admin</option> -->
+                <option value="B.R.A.B.U Muzaffarpur">
+                  B.R.A.B.U Muzaffarpur
+                </option>
+                <option value="B.N.M.U Madhepura">B.N.M.U Madhepura</option>
+                <option value="J.P.U Chapra">J.P.U Chapra</option>
+                <option value="K.S.D.S.U Darbhanga">K.S.D.S.U Darbhanga</option>
+                <option value="L.N.M.U Darbhanga">L.N.M.U Darbhanga</option>
+                <option value="Magadh University Gaya">
+                  Magadh University Gaya
+                </option>
+                <option value="M.M.H.P.U. Patna">M.M.H.P.U. Patna</option>
+                <option value="Munger University Munger">
+                  Munger University Munger
+                </option>
+                <option value="Patna University Patna">
+                  Patna University Patna
+                </option>
+                <option value="Patliputra University Patna">
+                  Patliputra University Patna
+                </option>
+                <option value="Purnea University, Purnia">
+                  Purnea University, Purnia
+                </option>
+                <option value="T.M.B.U Bhagalpur">T.M.B.U Bhagalpur</option>
+                <option value="V.K.S.U Ara">V.K.S.U Ara</option>
+                <option value="Aryabhatta Knowledge University Patna">
+                  Aryabhatta Knowledge University Patna
+                </option>
+              </select>
+            </li>
+            <li>
               <a href="{% url 'generate_R3' %}" id="r3-link" class="link">R3</a>
               <input type="text" id="datepicker2" class="datepicker2" />
             </li>
             <li>
-              <a href="{% url 'signin' %}" class="link">Start Filling</a>
+              <a href="{% url 'signin_admin' %}" class="link">Start Filling</a>
             </li>
           </ul>
         </div>
       </nav>
+      {% block content %} {% endblock content %}
     </div>
-
-    {% for message in messages %}
-    <div
-      class="alert alert-{{message.tags}}"
-      role="alert"
-      style="margin-top: 30px"
-    >
-      <h5>{{message}}</h5>
-    </div>
-    {% endfor %} {% block content %}
-    <h1>Hello World</h1>
-    {% endblock content %}
   </body>
   <script>
+    $("#datepicker, #datepicker2, #datepicker3,#universitypicker").hide();
     $(document).ready(function () {
       $("#datepicker").datepicker({
         dateFormat: "yy-mm-dd", // Ensures the date is selected in the correct format
@@ -81,10 +133,57 @@
       $("#datepicker2").datepicker({
         dateFormat: "yy-mm-dd", // Ensures the date is selected in the correct format
       });
-      $("#data-link").click(function (event) {
-          event.preventDefault(); // Prevent default link behavior
-          window.location.href = '{% url "generate_data" %}';
+      $("#datepicker3").datepicker({
+        dateFormat: "yy-mm-dd", // Ensures the date is selected in the correct format
       });
+      $("#data-link").click(function (event) {
+        event.preventDefault(); // Prevent default link behavior
+        window.location.href = '{% url "generate_data" %}';
+      });
+      function toggleDatepickers(datepickerToShow, datepickersToHide) {
+        $(datepickerToShow).show(); // Show the datepicker to be shown
+
+        // Hide the other datepickers
+        $(datepickersToHide.join(",")).hide();
+      }
+      // Hover event for r1-link
+      $("#r1-link").hover(
+        function () {
+          toggleDatepickers("#datepicker", [
+            "#datepicker2",
+            "#datepicker3",
+            "#universitypicker",
+          ]);
+        },
+        function () {
+          // No action needed on mouseout
+        }
+      );
+
+      // Hover event for r2-link
+      $("#r2-link").hover(
+        function () {
+          toggleDatepickers("#datepicker3", ["#datepicker", "#datepicker2"]);
+          $("#universitypicker").show();
+        },
+        function () {
+          // No action needed on mouseout
+        }
+      );
+
+      // Hover event for r3-link
+      $("#r3-link").hover(
+        function () {
+          toggleDatepickers("#datepicker2", [
+            "#datepicker",
+            "#datepicker3",
+            "#universitypicker",
+          ]);
+        },
+        function () {
+          // No action needed on mouseout
+        }
+      );
 
       $("#r1-link").click(function (event) {
         event.preventDefault(); // Prevent default link behavior
@@ -148,6 +247,39 @@
           alert("Please select a date.");
         }
       });
+      $("#r2-link").click(function (event) {
+        event.preventDefault(); // Prevent default link behavior
+
+        // Get the selected date from the datepicker
+        var selectedDate = $("#datepicker3").val();
+        var university = $("#universitypicker").val();
+        console.log(university);
+        // Check if a date is selected
+        if (selectedDate && university) {
+          // Send an AJAX request to the generate_R1 URL with the selected date
+          $.ajax({
+            type: "GET",
+            url: '{% url "generate_R2" %}',
+            data: { user_date: selectedDate, university_name: university },
+            success: function (response) {
+              // Create a hidden link and trigger the download
+              var hiddenElement = document.createElement("a");
+              hiddenElement.href =
+                "data:text/csv;charset=utf-8," + encodeURI(response);
+              hiddenElement.target = "_blank";
+              hiddenElement.download =
+                university + "R2_" + selectedDate + ".csv";
+              hiddenElement.click();
+            },
+            error: function (xhr, status, error) {
+              console.error("Error:", error);
+              alert("Failed to download CSV file.");
+            },
+          });
+        } else {
+          alert("Please select a date and university.");
+        }
+      });
       $("#datepicker").change(function () {
         var formattedDate = $(this).val(); // Get the value in 'YYYY-MM-DD' format directly
 
@@ -187,6 +319,29 @@
               "data:text/csv;charset=utf-8," + encodeURI(response);
             hiddenElement.target = "_blank";
             hiddenElement.download = "R3" + selectedDate + ".csv";
+            hiddenElement.click(); // Update the DOM with the response
+          },
+          error: function (xhr, status, error) {
+            console.error("Error:", error);
+          },
+        });
+      });
+      $("#datepicker3").change(function () {
+        var formattedDate = $(this).val(); // Get the value in 'YYYY-MM-DD' format directly
+
+        console.log("Formatted Date Sent to Server:", formattedDate); // Check the formatted date
+
+        $.ajax({
+          type: "GET",
+          url: '{% url "generate_R2" %}',
+          data: { user_date: formattedDate },
+          success: function (response) {
+            console.log("hi");
+            var hiddenElement = document.createElement("a");
+            hiddenElement.href =
+              "data:text/csv;charset=utf-8," + encodeURI(response);
+            hiddenElement.target = "_blank";
+            hiddenElement.download = "R2" + selectedDate + ".csv";
             hiddenElement.click(); // Update the DOM with the response
           },
           error: function (xhr, status, error) {
