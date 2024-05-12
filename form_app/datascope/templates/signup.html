@@ -1,122 +1,27 @@
 {% extends "base.html" %} {% block content %}
 <style>
   form {
-    width: 500px;
+    width: 35vw;
     height: auto;
-    padding: 20px 20px 20px 20px;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    margin: 50px auto;
-    border-radius: 20px;
+    padding: 2vh 2vh 2vh 2vh;
+    box-shadow: rgba(0, 0, 0, 0.409) 0px 0.5vw 1.5vw;
+    margin: 5vw auto;
+    border-radius: 2vw;
     content: "";
     top: 0;
     left: 0;
-    background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white */
+    background-color: rgba(255, 255, 255, 0.723); /* Semi-transparent white */
     z-index: 2;
   }
-
-  form p {
-    text-align: center;
-  }
-
-  form h2 {
-    text-align: center;
-  }
-  .two-forms {
-    /* display: flex; */
-    /* gap: 30px; */
-    margin-top: 10px;
-  }
-  .input-box {
-    text-align: center; /* Center align the input fields */
-    margin-bottom: 10px;
-  }
-
-  .input-box input[type="text"],
-  .input-box input[type="email"],
-  .input-box input[type="password"],
   .input-box input[type="tel"],
   .input-box select {
     width: 75%;
-    padding: 5px;
+    padding: 0.5vh;
     margin: 50 auto;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
+    margin-bottom: 1vh;
+    border: 0.1vh solid #ccc;
+    border-radius: 2vh;
     box-sizing: border-box;
-  }
-  /* Style submit button */
-  .btn-primary {
-    display: block;
-    margin: 20px auto;
-    width: 50%;
-    padding: 12px 20px;
-    /* margin-top: 10px; */
-    border: none;
-    outline: none;
-    border-radius: 30px;
-    background-color: rgba(255, 255, 255, 1);
-    color: #000000;
-    font-size: 15px;
-    cursor: pointer;
-    transition: 0.3s ease-in-out;
-  }
-
-  .btn-primary:hover {
-    color: #ffffff;
-    background-color: #000000;
-  }
-
-  /* Style link */
-  p a {
-    color: #060606;
-  }
-
-  p a:hover {
-    text-decoration: underline;
-  }
-  .reminder {
-    animation: reminderAnimation 0.9s ease infinite alternate;
-    color: rgba(153, 31, 31, 0.745);
-  }
-
-  @keyframes reminderAnimation {
-    0% {
-      opacity: 0; /* Start with opacity 0 */
-      transform: translateY(-10px); /* Move up slightly */
-    }
-    100% {
-      opacity: 1; /* End with full opacity */
-      transform: translateY(0); /* Return to normal position */
-    }
-  }
-  .button-loader {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .button-loader:after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 24px;
-    height: 24px;
-    margin: -12px 0 0 -12px;
-    border: 4px solid #fff;
-    border-top: 4px solid #3498db;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    box-sizing: border-box;
-    transform-origin: 50% 50%;
-  }
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
   }
 </style>
 <form action="" method="POST" id="registration-form">
@@ -135,7 +40,7 @@
         required
       >
         <option value="">Select University</option>
-        <!-- <option value="admin">admin</option> -->
+        <option value="admin">admin</option>
         <option value="B.R.A.B.U Muzaffarpur">B.R.A.B.U Muzaffarpur</option>
         <option value="B.N.M.U Madhepura">B.N.M.U Madhepura</option>
         <option value="J.P.U Chapra">J.P.U Chapra</option>
