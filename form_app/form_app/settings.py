@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-8^^6znr)szg9x!a_7_9*gcnn-7i$4ipy=zw5w+@o*d)=x^f(mm
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['3.33.130.190','15.197.148.33']
 
 
 # Application definition
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'datascope'
 ]
 
 MIDDLEWARE = [
@@ -76,7 +77,7 @@ WSGI_APPLICATION = 'form_app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'monitor_university',
+        'NAME': 'college_data',
         'USER': 'rishirajdatta7',
         'HOST': 'localhost',
         'PORT': '5432',
