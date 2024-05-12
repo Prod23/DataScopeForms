@@ -10,24 +10,14 @@
     />
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <style>
-      #home {
-        text-decoration: none;
-        font-weight: 500;
-        font-size: 22px;
-        color: #fff;
-        padding-bottom: 15px;
-        margin: 0 15px;
-      }
-      #home:hover,
-      .active {
-        border-bottom: 2px solid #fff;
-      }
-    </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Monitoring Form</title>
   </head>
   <body>
+    <div class="background-container">
+      <div class="background-image"></div>
+    </div>
+
     <div class="wrapper">
       <div class="overlay"></div>
       <nav class="nav">
@@ -44,6 +34,9 @@
           </ul>
         </div>
       </nav>
+
+      {% block content %}
+      {% endblock content %}
     </div>
 
     {% for message in messages %}
@@ -54,8 +47,7 @@
     >
       <h5>{{message}}</h5>
     </div>
-    {% endfor %} {% block content %}
-    <h1>Hello World</h1>
-    {% endblock content %}
+    {% endfor %}
   </body>
 </html>
+
