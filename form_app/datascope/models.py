@@ -17,11 +17,7 @@ class CustomUser(AbstractUser):
         return f"{self.university_name} - {self.college_name}"
 
     def save(self, *args, **kwargs):
-        # Concatenate college_name and university_name to form the username
-        self.college_name = self.college_name.replace(' ', '_').replace(
-            ':', '').replace('(', '').replace(')', '').replace('-', '').replace(',', '')
-        self.university_name = self.university_name.replace(' ', '_')
-        self.username = f"{self.college_name}_{self.university_name.replace('.','')}"
+        self.username = f"{self.college_name.replace(' ', '_').replace(':', '').replace('(', '').replace(')', '').replace('-', '').replace(',', '')}_{self.university_name.replace(' ', '_').replace('.','')}"
 
         existing_users = CustomUser.objects.filter(username=self.username)
         if self.pk:  # Check if the instance already exists (updating)
@@ -31,7 +27,6 @@ class CustomUser(AbstractUser):
             raise ValueError("Username must be unique.")
 
         super().save(*args, **kwargs)
-
 
 class Questionnaire(models.Model):
     email = models.EmailField(blank=True)
@@ -68,6 +63,7 @@ class Questionnaire(models.Model):
     non_teaching = models.PositiveIntegerField(default=0)
     non_teaching_salary_on_hold = models.PositiveIntegerField(default=0)
     non_teaching_una_leave = models.PositiveIntegerField(default=0)
+    non_teaching_other_action = models.PositiveIntegerField(default=0)
     faculty_more_five = models.PositiveIntegerField(default=0)
     not_faculty_more_five = models.PositiveIntegerField(default=0)
     faculty_less_three = models.PositiveIntegerField(default=0)
@@ -77,12 +73,7 @@ class Questionnaire(models.Model):
     lab_scheduled = models.PositiveIntegerField(default=0)
     lab_held = models.PositiveIntegerField(default=0)
     inspection = models.BooleanField(default=False)
-    aishe = models.BooleanField(default=False)
-    voter_awareness = models.BooleanField(default=False)
-    num_students_voter_awareness = models.PositiveIntegerField(default=0)
-    college_occupation = models.CharField(max_length=50, default='')
-    reason_college_occupation = models.CharField(max_length=50, default='')
-    merged_accounts_two = models.CharField(max_length=50, default='')
+    merged_accounts_two = models.BooleanField(default=False)
     num_bank_accounts_existed_earlier = models.PositiveIntegerField(default=0)
     num_bank_accounts_existed_today = models.PositiveIntegerField(default=0)
 
@@ -101,6 +92,7 @@ class CourseInformation(models.Model):
     date = models.DateField(auto_now_add=True)
 
     # Postgraduate Arts Courses
+    pg_arts_exist = models.BooleanField(default=False)
     pg_arts_sem1_enrolled = models.PositiveIntegerField(default=0)
     pg_arts_sem1_present = models.PositiveIntegerField(default=0)
     pg_arts_sem2_enrolled = models.PositiveIntegerField(default=0)
@@ -111,6 +103,7 @@ class CourseInformation(models.Model):
     pg_arts_sem4_present = models.PositiveIntegerField(default=0)
     
     # Postgraduate Science Courses
+    pg_science_exist = models.BooleanField(default=False)
     pg_science_sem1_enrolled = models.PositiveIntegerField(default=0)
     pg_science_sem1_present = models.PositiveIntegerField(default=0)
     pg_science_sem2_enrolled = models.PositiveIntegerField(default=0)
@@ -121,6 +114,7 @@ class CourseInformation(models.Model):
     pg_science_sem4_present = models.PositiveIntegerField(default=0)
 
     # Postgraduate Commerce Courses
+    pg_commerce_exist = models.BooleanField(default=False)
     pg_commerce_sem1_enrolled = models.PositiveIntegerField(default=0)
     pg_commerce_sem1_present = models.PositiveIntegerField(default=0)
     pg_commerce_sem2_enrolled = models.PositiveIntegerField(default=0)
@@ -131,6 +125,7 @@ class CourseInformation(models.Model):
     pg_commerce_sem4_present = models.PositiveIntegerField(default=0)
 
     # Postgraduate Professional/Other Courses
+    pg_professional_exist = models.BooleanField(default=False)
     pg_professional_sem1_enrolled = models.PositiveIntegerField(default=0)
     pg_professional_sem1_present = models.PositiveIntegerField(default=0)
     pg_professional_sem2_enrolled = models.PositiveIntegerField(default=0)
@@ -141,6 +136,7 @@ class CourseInformation(models.Model):
     pg_professional_sem4_present = models.PositiveIntegerField(default=0)
 
     # Undergraduate Arts Courses
+    ug_arts_exist = models.BooleanField(default=False)
     ug_arts_sem1_enrolled = models.PositiveIntegerField(default=0)
     ug_arts_sem1_present = models.PositiveIntegerField(default=0)
     ug_arts_yr2_enrolled = models.PositiveIntegerField(default=0)
@@ -149,6 +145,7 @@ class CourseInformation(models.Model):
     ug_arts_yr3_present = models.PositiveIntegerField(default=0)
 
     # Undergraduate Science Courses
+    ug_science_exist = models.BooleanField(default=False)
     ug_science_sem1_enrolled = models.PositiveIntegerField(default=0)
     ug_science_sem1_present = models.PositiveIntegerField(default=0)
     ug_science_yr2_enrolled = models.PositiveIntegerField(default=0)
@@ -157,6 +154,7 @@ class CourseInformation(models.Model):
     ug_science_yr3_present = models.PositiveIntegerField(default=0)
 
     # Undergraduate Commerce Courses
+    ug_commerce_exist = models.BooleanField(default=False)
     ug_commerce_sem1_enrolled = models.PositiveIntegerField(default=0)
     ug_commerce_sem1_present = models.PositiveIntegerField(default=0)
     ug_commerce_yr2_enrolled = models.PositiveIntegerField(default=0)
@@ -165,6 +163,7 @@ class CourseInformation(models.Model):
     ug_commerce_yr3_present = models.PositiveIntegerField(default=0)
 
     # Undergraduate Professional/Other Courses
+    ug_professional_exist = models.BooleanField(default=False)
     ug_professional_sem1_enrolled = models.PositiveIntegerField(default=0)
     ug_professional_sem1_present = models.PositiveIntegerField(default=0)
     ug_professional_sem2_enrolled = models.PositiveIntegerField(default=0)
