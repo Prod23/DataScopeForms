@@ -1,96 +1,110 @@
 {% extends "admin_base.html" %} {% block content %}
 <style>
   form {
-    width: 1100px;
+    width: 90vw;
     height: auto;
-    padding: 20px;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    margin: 50px auto;
-    border-radius: 20px;
-    background-color: rgba(88, 157, 130, 0.85);
+    padding: 2vh;
+    box-shadow: rgba(255, 0, 0, 0.878) 0.5vh 0.5vh 1.5vh;
+    margin: 5vh auto;
+    border-radius: 2vh;
+    background-color: rgba(88, 157, 130, 0.95);
     overflow-y: auto;
-    max-height: calc(83vh - 100px);
+    margin-top: 12vh;
+    max-height: 70vh;
+    z-index: 2;
   }
 
   form h2 {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 2vh;
   }
 
   .input-box {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    justify-content: space-between;
+    margin-bottom: 1vh;
     font-weight: 470;
-    counter-increment: question-counter; /* Increment the counter for each question */
+    counter-increment: question-counter;
   }
+
   .input-box label {
-    flex: 1; /* Allow the text to take up remaining space */
+    flex: 1;
+    display: flex;
   }
 
   /* Styling for the numbering */
   .input-box:before {
-    margin-right: 10px;
-    content: counter(question-counter) ": "; /* Display the question number */
+    margin-right: 0.5vh;
+    content: counter(question-counter) ": ";
   }
 
   .input-box input[type="text"],
-  .input-box input[type="email"],
-  .input-box input[type="password"],
-  .input-box input[type="number"],
+  .input-box input[type="number"]{
+    width: 10%;
+    padding: 0.7vh;
+    margin-bottom: 1vh;
+    border: 0.1vh solid #ccc;
+    box-sizing: border-box;
+    outline: none;
+  }
   .input-box select {
-    width: calc(20% - 50px);
-    padding: 7px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
+    width: 25%;
+    padding: 0.7vh;
+    margin-bottom: 1vh;
+    border: 0.1vh solid #ccc;
+    box-sizing: border-box;
+    outline: none;
+  }
+  .input-box input[type="text"] {
+    width: 30%;
+    padding: 1.4vh;
+    margin-bottom: 1vh;
+    border: 0.1vh solid #ccc;
     box-sizing: border-box;
     outline: none;
   }
 
   .input-box input[type="checkbox"] {
-    margin-right: 10px;
-    width: 20px; /* Adjust width */
-    height: 20px; /* Adjust height */
+    margin-left: 0.5vh;
+    margin-right: 0.5vh;
+    width: 2.2vh;
+    height: 2.2vh;
     appearance: none;
     background-color: rgba(153, 31, 31);
-    border: 1px solid #ccc; /* Border */
-    border-radius: 5px; /* Border radius */
-    cursor: pointer; /* Cursor style */
-    vertical-align: middle; /* Align vertically */
-    outline: none; /* Remove focus outline */
-    position: relative; /* Positioning context for the tick */
+    border: 0.4vh solid #ccc;
+    cursor: pointer;
+    vertical-align: middle;
+    outline: none;
+    position: relative;
   }
 
   .input-box input[type="checkbox"]:checked {
-    background-color: rgba(
-      88,
-      157,
-      130
-    ); /* Change background color when checked */
+    background-color: rgba(88, 157, 130);
   }
+
   .input-box input[type="checkbox"]:checked::before {
-    content: "\2713"; /* Unicode character for a checkmark */
-    font-size: 16px; /* Adjust size */
-    color: #fff; /* Color of the tick */
-    position: absolute; /* Positioning relative to the checkbox */
-    top: 50%; /* Align vertically */
-    left: 50%; /* Align horizontally */
-    transform: translate(-50%, -50%); /* Center the tick */
+    content: "\2713";
+    font-size: 1.6vh;
+    color: #fff;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .btn-primary {
     display: block;
-    margin: 20px auto;
+    margin: 2vh auto;
     width: 30%;
-    padding: 12px 20px;
-    margin-top: 2px;
+    padding: 1.2vh 2vh;
+    margin-top: 0.2vh;
     border: none;
     outline: none;
-    border-radius: 20px;
+    border-radius: 2vh;
     background-color: rgba(255, 255, 255, 1);
     color: #000000;
-    font-size: 15px;
+    font-size: 1.5vh;
     cursor: pointer;
     transition: 0.3s ease-in-out;
   }
@@ -100,6 +114,8 @@
     background-color: #000000;
   }
 </style>
+
+
 
 <form action="" method="POST" id="questionnaireForm">
   {% csrf_token %} {{ form.errors }} {{ form.non_field_errors }}
@@ -210,25 +226,7 @@
       endif
       %}
     />
-    <label for="biometric">Biometric Attendance Facility available</label>
-  </div>
-  <div class="input-box">
-    <input
-      type="checkbox"
-      id="biometric_working"
-      name="biometric_working"
-      {%
-      if
-      questionnaire.biometric_working
-      %}
-      checked
-      {%
-      endif
-      %}
-    />
-    <label for="biometric_working"
-      >Biometric Attendance Facility available</label
-    >
+    <label for="biometric">Biometric Attendance Facility availabe</label>
   </div>
   <div class="input-box">
     <input
@@ -342,7 +340,7 @@
       value="{{ questionnaire.num_under_construction }}"
     />
   </div>
-  <div class="input-box">
+  <!-- <div class="input-box">
     <label for="name_nodal_officer"
       >Name of the Nodal Officer</label
     >
@@ -363,7 +361,7 @@
       name="mobile_nodal_officer"
       value="{{ questionnaire.mobile_nodal_officer }}"
     />
-  </div>
+  </div> -->
   <div class="input-box">
     <label for="enrolled">Total No. of students enrolled (Only UG & PG)</label>
     <input
@@ -510,6 +508,17 @@
     />
   </div>
   <div class="input-box">
+    <label for="non_teaching_other_action"
+      >No of Non-Teaching staff on whom actions are taken other than salary on hold as action against absence.</label
+    >
+    <input
+      type="number"
+      id="non_teaching_other_action"
+      name="non_teaching_other_action"
+      value="{{ questionnaire.non_teaching_other_action }}"
+    />
+  </div>
+  <div class="input-box">
     <label for="faculty_more_five"
       >Number of faculty members engaged five (5) or more (Only UG& PG)
       classes/Lab-sessions today</label
@@ -620,96 +629,7 @@
       %}
     />
     <label for="inspection">Has Inspection happened Today ?</label>
-  </div>
-
-  <div class="input-box">
-    <input
-      type="checkbox"
-      id="aishe"
-      name="aishe"
-      {%
-      if
-      questionnaire.aishe
-      %}
-      checked
-      {%
-      endif
-      %}
-    />
-    <label for="aishe"
-      >Have you started process for filling AISHE 2022-2023 form ? क्या आप AISHE
-      2022-2023 के फॉर्म को भरने की प्रक्रिया शुरू कर चुके हैं ?
-    </label>
-  </div>
-
-  <div class="input-box">
-    <input
-      type="checkbox"
-      id="voter_awareness"
-      name="voter_awareness"
-      {%
-      if
-      questionnaire.voter_awareness
-      %}
-      checked
-      {%
-      endif
-      %}
-    />
-    <label for="voter_awareness"
-      >Has college conducted Voter Awareness Program today? क्या आपके कॉलेज
-      महाविद्यालय ने अपने परिसर में आज मतदाता जागरूकता कार्यक्रम चलाया है
-      ?</label
-    >
-  </div>
-
-  <div class="input-box">
-    <label for="num_students_voter_awareness"
-      >The total number of students participated in Voter Awareness Program till
-      date? कुल कितने छात्र छात्राओं ने मतदाता जागरूकता कार्यक्रम में भागीदारी
-      ली ?</label
-    >
-    <input
-      type="text"
-      id="num_students_voter_awareness"
-      name="num_students_voter_awareness"
-      value="{{ questionnaire.num_students_voter_awareness }}"
-    />
-  </div>
-
-  <div class="input-box">
-    <label for="college_occupation">College Occupation Status in case of Occupied for Election चुनाव में कॉलेज के उपयोग की स्थिति बताएँ</label>
-    <select id="college_occupation" name="college_occupation">
-      <option {% if questionnaire.college_occupation == 'not_occupied' %}selected{% endif %}>Not Occupied अधिग्रहण नहीं किया गया है</option>
-      <option {% if questionnaire.college_occupation == 'less_than_5_classrooms' %}selected{% endif %}>Less than 5 Classrooms Occupied पाँच से काम कमरे अधिगृहित हैं</option>
-      <option {% if questionnaire.college_occupation == 'section_occupied' %}selected{% endif %}>Section of College Occupied कॉलेज का कुछ भाग अधिगृहित है</option>
-      <option {% if questionnaire.college_occupation == 'fully_occupied' %}selected{% endif %}>Fully Occupied पूरा परिसर अभिगृहित है</option>
-      <option {% if questionnaire.college_occupation == 'inspection_only' %}selected{% endif %}>Only Inspection happened for Occupation अभी अधिग्रहण हेतु निरीक्षण हुआ है</option>
-      <option {% if questionnaire.college_occupation == 'election_training' %}selected{% endif %}>Occupied for Training purpose related to Election</option>
-    </select>
-  </div>  
-  <div class="input-box">
-    <label for="reason_college_occupation">Reasons for Colleges Occupied in Election Purposes, चुनाव में कॉलेज के अधिग्रहण का कारण बताएँ</label>
-    <select id="reason_college_occupation" name="reason_college_occupation">
-      <option {% if questionnaire.college_occupation == 'occupied_for_evm' %}selected{% endif %}>Occupied for EVM Storage (EVM रखने के लिए कॉलेज का उपयोग किया जा रहा है)</option>
-      <option {% if questionnaire.college_occupation == 'occupied_for_police' %}selected{% endif %}>Occupied for Police and Security Residence पुलिस अथवा सुरक्षा बल के रुकने के लिए उपयोग किया जा रहा है /</option>
-      <option {% if questionnaire.college_occupation == 'both' %}selected{% endif %}>both दोनों के लिए अधिग्रहण किया गया है /</option>
-      <option {% if questionnaire.college_occupation == 'not_occupied' %}selected{% endif %}>Not Occupied अधिग्रहण नहीं किया गया है /</option>
-    </select>
-  </div>  
-
-  <div class="input-box">
-    <label for="reason_college_occupation"
-      >Reasons for Colleges Occupied in Election Purposes, चुनाव में कॉलेज के
-      अधिग्रहण का कारण बताएँ</label
-    >
-    <input
-      type="text"
-      id="reason_college_occupation"
-      name="reason_college_occupation"
-      value="{{ questionnaire.reason_college_occupation }}"
-    />
-  </div>
+  </div> 
 
   <div class="input-box">
     <input
@@ -757,31 +677,18 @@
     />
   </div>
 
-  <!-- <div class="input-box">
+  <div class="input-box">
     <label for="remarks">Remarks</label>
     <input
       type="text"
       id="remarks"
       name="remarks"
-      value="{{ questionnaire.remarks }}"
     />
-  </div> -->
+  </div>
 
   <button id="loading-button" type="submit" class="btn btn-primary">
     Submit
   </button>
 </form>
-<!-- <script>
-    function disableForm() {
-        var form = document.getElementById('questionnaireForm');
-        var elements = form.elements;
-        for (var i = 0; i < elements.length; i++) {
-            elements[i].disabled = true;
-        }
-    }
-    document.getElementById('questionnaireForm').addEventListener('submit', function() {
-        // Call disableForm function upon successful form submission
-        disableForm();
-    });
-</script> -->
+
 {% endblock content %}
