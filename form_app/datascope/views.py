@@ -1,13 +1,12 @@
 from django.shortcuts import render, redirect
 from .forms import RegisterForm, QuestionnaireForm, CoursesInformationForm
-from .models import Questionnaire, CustomUser
+from .models import Questionnaire, CustomUser, CourseInformation
 from django.contrib import messages
 from django.contrib.auth import login
 from .forms import QuestionnaireForm
 from django.db.models import Sum, Count, F, Q, ExpressionWrapper, FloatField, IntegerField, Case, When
 import csv
 from django.http import HttpResponse
-
 
 
 # Create your views here.
@@ -20,8 +19,6 @@ def signup(request):
         if form.is_valid():
             print("Hi")
             user = form.save()
-            messages.success(
-                request, "You can fill the form now")
             # Redirect to a page where the user can verify their email
             return redirect("submit-form", username=f"{user.college_name.replace(' ', '_').replace(':', '').replace('(', '').replace(')', '').replace('-', '').replace(',', '')}_{user.university_name.replace(' ', '_').replace('.','')}")
     else:
@@ -44,12 +41,9 @@ def signin_admin(request):
 
         if user is not None:
             login(request, user)
-            messages.success(
-                request, f"{request.user.username}, Welcome Admin")
             return redirect("submit-form-admin", username=user.username)
 
         else:
-            messages.warning(request, "Wrong Credentials")
             return redirect("signin_admin")
 
     return render(request, "login_admin.html")
@@ -71,12 +65,9 @@ def signin(request):
 
         if user is not None:
             login(request, user)
-            messages.success(
-                request, f"{request.user.username}, start filling!")
             return redirect("submit-form", username=user.username)
 
         else:
-            messages.warning(request, "College Doesn't Exist Register Again")
             return redirect("register")
 
     return render(request, "login.html")
@@ -98,14 +89,17 @@ def submit_form(request, username):
         form = QuestionnaireForm()
 
     context = {"form": form}
-    return render(request, 'index.html', context)
+    return render(request, 'q_page.html', context)
+
 
 def submit_form_course(request, username):
     user_instance = CustomUser.objects.get(username=username)
 
     if request.method == 'POST':
         form = CoursesInformationForm(request.POST)
+        print("hi")
         if form.is_valid():
+            print("hi")
             form.instance.email = user_instance.email
             form.instance.college_type = user_instance.college_type
             form.instance.college_name = user_instance.college_name
@@ -117,6 +111,27 @@ def submit_form_course(request, username):
 
     context = {"form": form}
     return render(request, 'course_info.html', context)
+
+
+def submit_form_course_admin(request, username):
+    user_instance = CustomUser.objects.get(username=username)
+
+    if request.method == 'POST':
+        form = CoursesInformationForm(request.POST)
+        print("hi")
+        if form.is_valid():
+            print("hi")
+            form.instance.email = user_instance.email
+            form.instance.college_type = user_instance.college_type
+            form.instance.college_name = user_instance.college_name
+            form.instance.university_name = user_instance.university_name
+            form.save()
+            return redirect('success_page_url')
+    else:
+        form = CoursesInformationForm()
+
+    context = {"form": form}
+    return render(request, 'admin_course_info.html', context)
 
 
 def submit_form_admin(request, username):
@@ -131,7 +146,7 @@ def submit_form_admin(request, username):
             form.instance.university_name = user_instance.university_name
             form.save()
             # Redirect to a success page or another view
-            return redirect("submit-form-course", username=username)
+            return redirect("submit-form-course-admin", username=username)
     else:
         form = QuestionnaireForm()
 
@@ -142,19 +157,20 @@ def submit_form_admin(request, username):
 def success_page(request):
     return render(request, 'success.html')
 
+
 def generate_data(request):
     # Fetch data from Questionnaire model
     data = Questionnaire.objects.all()
-    
+
     # Create a HttpResponse object with the appropriate CSV header.
     response = HttpResponse(
         content_type='text/csv',
         headers={'Content-Disposition': 'attachment; filename="data.csv"'},
     )
-    
+
     # Create a CSV writer object using the response as its "file"
     writer = csv.writer(response)
-    
+
     # Writing the headers (assuming you have these fields in your model)
     writer.writerow([
         "Date", "Type", "College", "Email Address", "University",
@@ -174,17 +190,12 @@ def generate_data(request):
         "Teacher Other Action", "Total Non-Teaching", "Non-Teaching Salary on Hold",
         "Non-Teaching Other Action", "Non-Teaching UnA", "Faculty >5", "Not >5 Faculty",
         "Faculty <3", "Action on Fac. <5", "Class Scheduled", "Class Held", "Lab Scheduled",
-        "Lab Held", "No. of Inspection", "Inspection", "AISHE Completed",
-        "Have you started process for filling AISHE 2022-2023 form?",
-        "Voter Awareness Prog", "Has college conducted Voter Awareness Program today?",
-        "The total number of students participated in Voter Awareness Program till date?",
-        "College Occupation Status in case of Occupied for Election",
-        "Reasons for Colleges Occupied in Election Purposes",
+        "Lab Held", "No. of Inspection", "Inspection",
         "Has College Merged all the bank accounts into two accounts?",
         "How many bank accounts existed earlier in the College?",
         "How many bank accounts exists for College today?",
     ])
-    
+
     # Writing data rows
     for row in data:
         writer.writerow([
@@ -239,18 +250,13 @@ def generate_data(request):
             row.lab_held,
             1 if row.inspection else 0,
             row.inspection,
-            row.aishe,
-            1 if row.voter_awareness else 0,
-            row.voter_awareness,
-            row.num_students_voter_awareness,
-            row.college_occupation,
-            row.reason_college_occupation,
             row.merged_accounts_two,
             row.num_bank_accounts_existed_earlier,
             row.num_bank_accounts_existed_today,
         ])
-    
+
     return response
+
 
 def generate_R1(request):
     user_date = request.GET.get('user_date')
@@ -258,7 +264,7 @@ def generate_R1(request):
     if user_date:
         filtered_data = Questionnaire.objects.filter(date=user_date)
         print('HI')
-        grouped_data = filtered_data.values('college_type', 'university_name').annotate(
+        grouped_data = filtered_data.values('college_type', 'university_name').order_by('college_type', 'university_name').annotate(
             colleges_filled=Count('university_name'),
             inspected_colleges=Sum(
                 Case(
@@ -301,6 +307,7 @@ def generate_R1(request):
 
         # Create a csv writer object and write the header
         writer = csv.writer(response)
+        writer = csv.writer(response)
         writer.writerow(['College Type', 'University Name',
                          'Colleges Filled',
                          'Colleges Inspected',
@@ -319,13 +326,943 @@ def generate_R1(request):
         return HttpResponse("No valid date provided", status=400)
 
 
+def generate_R2(request):
+    user_date = request.GET.get('user_date')
+    university_name = request.GET.get('university_name')
+    print(user_date)
+    if user_date:
+        filtered_data = CourseInformation.objects.filter(
+            date=user_date, university_name=university_name)
+        print('HI')
+        grouped_data = filtered_data.values('college_type').order_by('college_type').annotate(
+            pg_arts_exist=Count('pg_arts_exist'),
+            pg_arts_sem1_50=Sum(
+                Case(
+                    When(Q(pg_arts_sem1_present__lt=F(
+                        'pg_arts_sem1_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_arts_sem1_50_to_75=Sum(
+                Case(
+                    When(Q(pg_arts_sem1_present__gte=F('pg_arts_sem1_enrolled') * 0.5) &
+                         Q(pg_arts_sem1_present__lt=F('pg_arts_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_arts_sem1_75=Sum(
+                Case(
+                    When(Q(pg_arts_sem1_present__gte=F(
+                        'pg_arts_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_arts_sem2_50=Sum(
+                Case(
+                    When(Q(pg_arts_sem2_present__lt=F(
+                        'pg_arts_sem2_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_arts_sem2_50_to_75=Sum(
+                Case(
+                    When(Q(pg_arts_sem2_present__gte=F('pg_arts_sem2_enrolled') * 0.5) &
+                         Q(pg_arts_sem2_present__lt=F('pg_arts_sem2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_arts_sem2_75=Sum(
+                Case(
+                    When(Q(pg_arts_sem2_present__gte=F(
+                        'pg_arts_sem2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_arts_sem3_50=Sum(
+                Case(
+                    When(Q(pg_arts_sem3_present__lt=F(
+                        'pg_arts_sem3_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_arts_sem3_50_to_75=Sum(
+                Case(
+                    When(Q(pg_arts_sem3_present__gte=F('pg_arts_sem3_enrolled') * 0.5) &
+                         Q(pg_arts_sem3_present__lt=F('pg_arts_sem3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_arts_sem3_75=Sum(
+                Case(
+                    When(Q(pg_arts_sem3_present__gte=F(
+                        'pg_arts_sem3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_arts_sem4_50=Sum(
+                Case(
+                    When(Q(pg_arts_sem4_present__lt=F(
+                        'pg_arts_sem4_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_arts_sem4_50_to_75=Sum(
+                Case(
+                    When(Q(pg_arts_sem4_present__gte=F('pg_arts_sem4_enrolled') * 0.5) &
+                         Q(pg_arts_sem4_present__lt=F('pg_arts_sem4_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_arts_sem4_75=Sum(
+                Case(
+                    When(Q(pg_arts_sem4_present__gte=F(
+                        'pg_arts_sem4_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_science_exist=Count('pg_science_exist'),
+            pg_science_sem1_50=Sum(
+                Case(
+                    When(Q(pg_science_sem1_present__lt=F(
+                        'pg_science_sem1_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_science_sem1_50_to_75=Sum(
+                Case(
+                    When(Q(pg_science_sem1_present__gte=F('pg_science_sem1_enrolled') * 0.5) &
+                         Q(pg_science_sem1_present__lt=F('pg_science_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_science_sem1_75=Sum(
+                Case(
+                    When(Q(pg_science_sem1_present__gte=F(
+                        'pg_science_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_science_sem2_50=Sum(
+                Case(
+                    When(Q(pg_science_sem2_present__lt=F(
+                        'pg_science_sem2_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_science_sem2_50_to_75=Sum(
+                Case(
+                    When(Q(pg_science_sem2_present__gte=F('pg_science_sem2_enrolled') * 0.5) &
+                         Q(pg_science_sem2_present__lt=F('pg_science_sem2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_science_sem2_75=Sum(
+                Case(
+                    When(Q(pg_science_sem2_present__gte=F(
+                        'pg_science_sem2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_science_sem3_50=Sum(
+                Case(
+                    When(Q(pg_science_sem3_present__lt=F(
+                        'pg_science_sem3_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_science_sem3_50_to_75=Sum(
+                Case(
+                    When(Q(pg_science_sem3_present__gte=F('pg_science_sem3_enrolled') * 0.5) &
+                         Q(pg_science_sem3_present__lt=F('pg_science_sem3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_science_sem3_75=Sum(
+                Case(
+                    When(Q(pg_science_sem3_present__gte=F(
+                        'pg_science_sem3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_science_sem4_50=Sum(
+                Case(
+                    When(Q(pg_science_sem4_present__lt=F(
+                        'pg_science_sem4_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_science_sem4_50_to_75=Sum(
+                Case(
+                    When(Q(pg_science_sem4_present__gte=F('pg_science_sem4_enrolled') * 0.5) &
+                         Q(pg_science_sem4_present__lt=F('pg_science_sem4_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_science_sem4_75=Sum(
+                Case(
+                    When(Q(pg_science_sem4_present__gte=F(
+                        'pg_science_sem4_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_commerce_exist=Count('pg_commerce_exist'),
+            pg_commerce_sem1_50=Sum(
+                Case(
+                    When(Q(pg_commerce_sem1_present__lt=F(
+                        'pg_commerce_sem1_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_commerce_sem1_50_to_75=Sum(
+                Case(
+                    When(Q(pg_commerce_sem1_present__gte=F('pg_commerce_sem1_enrolled') * 0.5) &
+                         Q(pg_commerce_sem1_present__lt=F('pg_commerce_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_commerce_sem1_75=Sum(
+                Case(
+                    When(Q(pg_commerce_sem1_present__gte=F(
+                        'pg_commerce_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_commerce_sem2_50=Sum(
+                Case(
+                    When(Q(pg_commerce_sem2_present__lt=F(
+                        'pg_commerce_sem2_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_commerce_sem2_50_to_75=Sum(
+                Case(
+                    When(Q(pg_commerce_sem2_present__gte=F('pg_commerce_sem2_enrolled') * 0.5) &
+                         Q(pg_commerce_sem2_present__lt=F('pg_commerce_sem2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_commerce_sem2_75=Sum(
+                Case(
+                    When(Q(pg_commerce_sem2_present__gte=F(
+                        'pg_commerce_sem2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_commerce_sem3_50=Sum(
+                Case(
+                    When(Q(pg_commerce_sem3_present__lt=F(
+                        'pg_commerce_sem3_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_commerce_sem3_50_to_75=Sum(
+                Case(
+                    When(Q(pg_commerce_sem3_present__gte=F('pg_commerce_sem3_enrolled') * 0.5) &
+                         Q(pg_commerce_sem3_present__lt=F('pg_commerce_sem3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_commerce_sem3_75=Sum(
+                Case(
+                    When(Q(pg_commerce_sem3_present__gte=F(
+                        'pg_commerce_sem3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_commerce_sem4_50=Sum(
+                Case(
+                    When(Q(pg_commerce_sem4_present__lt=F(
+                        'pg_commerce_sem4_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_commerce_sem4_50_to_75=Sum(
+                Case(
+                    When(Q(pg_commerce_sem4_present__gte=F('pg_commerce_sem4_enrolled') * 0.5) &
+                         Q(pg_commerce_sem4_present__lt=F('pg_commerce_sem4_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_commerce_sem4_75=Sum(
+                Case(
+                    When(Q(pg_commerce_sem4_present__gte=F(
+                        'pg_commerce_sem4_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_professional_exist=Count('pg_professional_exist'),
+            pg_professional_sem1_50=Sum(
+                Case(
+                    When(Q(pg_professional_sem1_present__lt=F(
+                        'pg_professional_sem1_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_professional_sem1_50_to_75=Sum(
+                Case(
+                    When(Q(pg_professional_sem1_present__gte=F('pg_professional_sem1_enrolled') * 0.5) &
+                         Q(pg_professional_sem1_present__lt=F('pg_professional_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_professional_sem1_75=Sum(
+                Case(
+                    When(Q(pg_professional_sem1_present__gte=F(
+                        'pg_professional_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_professional_sem2_50=Sum(
+                Case(
+                    When(Q(pg_professional_sem2_present__lt=F(
+                        'pg_professional_sem2_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_professional_sem2_50_to_75=Sum(
+                Case(
+                    When(Q(pg_professional_sem2_present__gte=F('pg_professional_sem2_enrolled') * 0.5) &
+                         Q(pg_professional_sem2_present__lt=F('pg_professional_sem2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_professional_sem2_75=Sum(
+                Case(
+                    When(Q(pg_professional_sem2_present__gte=F(
+                        'pg_professional_sem2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_professional_sem3_50=Sum(
+                Case(
+                    When(Q(pg_professional_sem3_present__lt=F(
+                        'pg_professional_sem3_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_professional_sem3_50_to_75=Sum(
+                Case(
+                    When(Q(pg_professional_sem3_present__gte=F('pg_professional_sem3_enrolled') * 0.5) &
+                         Q(pg_professional_sem3_present__lt=F('pg_professional_sem3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_professional_sem3_75=Sum(
+                Case(
+                    When(Q(pg_professional_sem3_present__gte=F(
+                        'pg_professional_sem3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_professional_sem4_50=Sum(
+                Case(
+                    When(Q(pg_professional_sem4_present__lt=F(
+                        'pg_professional_sem4_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_professional_sem4_50_to_75=Sum(
+                Case(
+                    When(Q(pg_professional_sem4_present__gte=F('pg_professional_sem4_enrolled') * 0.5) &
+                         Q(pg_professional_sem4_present__lt=F('pg_professional_sem4_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            pg_professional_sem4_75=Sum(
+                Case(
+                    When(Q(pg_professional_sem4_present__gte=F(
+                        'pg_professional_sem4_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_arts_exist=Count('ug_arts_exist'),
+            ug_arts_sem1_50=Sum(
+                Case(
+                    When(Q(ug_arts_sem1_present__lt=F(
+                        'ug_arts_sem1_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_arts_sem1_50_to_75=Sum(
+                Case(
+                    When(Q(ug_arts_sem1_present__gte=F('ug_arts_sem1_enrolled') * 0.5) &
+                         Q(ug_arts_sem1_present__lt=F('ug_arts_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_arts_sem1_75=Sum(
+                Case(
+                    When(Q(ug_arts_sem1_present__gte=F(
+                        'ug_arts_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_arts_yr2_50=Sum(
+                Case(
+                    When(Q(ug_arts_yr2_present__lt=F(
+                        'ug_arts_yr2_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_arts_yr2_50_to_75=Sum(
+                Case(
+                    When(Q(ug_arts_yr2_present__gte=F('ug_arts_yr2_enrolled') * 0.5) &
+                         Q(ug_arts_yr2_present__lt=F('ug_arts_yr2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_arts_yr2_75=Sum(
+                Case(
+                    When(Q(ug_arts_yr2_present__gte=F(
+                        'ug_arts_yr2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_arts_yr3_50=Sum(
+                Case(
+                    When(Q(ug_arts_yr3_present__lt=F(
+                        'ug_arts_yr3_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_arts_yr3_50_to_75=Sum(
+                Case(
+                    When(Q(ug_arts_yr3_present__gte=F('ug_arts_yr3_enrolled') * 0.5) &
+                         Q(ug_arts_yr3_present__lt=F('ug_arts_yr3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_arts_yr3_75=Sum(
+                Case(
+                    When(Q(ug_arts_yr3_present__gte=F(
+                        'ug_arts_yr3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_science_exist=Count('ug_science_exist'),
+            ug_science_sem1_50=Sum(
+                Case(
+                    When(Q(ug_science_sem1_present__lt=F(
+                        'ug_science_sem1_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_science_sem1_50_to_75=Sum(
+                Case(
+                    When(Q(ug_science_sem1_present__gte=F('ug_science_sem1_enrolled') * 0.5) &
+                         Q(ug_science_sem1_present__lt=F('ug_science_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_science_sem1_75=Sum(
+                Case(
+                    When(Q(ug_science_sem1_present__gte=F(
+                        'ug_science_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_science_yr2_50=Sum(
+                Case(
+                    When(Q(ug_science_yr2_present__lt=F(
+                        'ug_science_yr2_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_science_yr2_50_to_75=Sum(
+                Case(
+                    When(Q(ug_science_yr2_present__gte=F('ug_science_yr2_enrolled') * 0.5) &
+                         Q(ug_science_yr2_present__lt=F('ug_science_yr2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_science_yr2_75=Sum(
+                Case(
+                    When(Q(ug_science_yr2_present__gte=F(
+                        'ug_science_yr2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_science_yr3_50=Sum(
+                Case(
+                    When(Q(ug_science_yr3_present__lt=F(
+                        'ug_science_yr3_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_science_yr3_50_to_75=Sum(
+                Case(
+                    When(Q(ug_science_yr3_present__gte=F('ug_science_yr3_enrolled') * 0.5) &
+                         Q(ug_science_yr3_present__lt=F('ug_science_yr3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_science_yr3_75=Sum(
+                Case(
+                    When(Q(ug_science_yr3_present__gte=F(
+                        'ug_science_yr3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_commerce_exist=Count('ug_commerce_exist'),
+            ug_commerce_sem1_50=Sum(
+                Case(
+                    When(Q(ug_commerce_sem1_present__lt=F(
+                        'ug_commerce_sem1_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_commerce_sem1_50_to_75=Sum(
+                Case(
+                    When(Q(ug_commerce_sem1_present__gte=F('ug_commerce_sem1_enrolled') * 0.5) &
+                         Q(ug_commerce_sem1_present__lt=F('ug_commerce_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_commerce_sem1_75=Sum(
+                Case(
+                    When(Q(ug_commerce_sem1_present__gte=F(
+                        'ug_commerce_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_commerce_yr2_50=Sum(
+                Case(
+                    When(Q(ug_commerce_yr2_present__lt=F(
+                        'ug_commerce_yr2_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_commerce_yr2_50_to_75=Sum(
+                Case(
+                    When(Q(ug_commerce_yr2_present__gte=F('ug_commerce_yr2_enrolled') * 0.5) &
+                         Q(ug_commerce_yr2_present__lt=F('ug_commerce_yr2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_commerce_yr2_75=Sum(
+                Case(
+                    When(Q(ug_commerce_yr2_present__gte=F(
+                        'ug_commerce_yr2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_commerce_yr3_50=Sum(
+                Case(
+                    When(Q(ug_commerce_yr3_present__lt=F(
+                        'ug_commerce_yr3_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_commerce_yr3_50_to_75=Sum(
+                Case(
+                    When(Q(ug_commerce_yr3_present__gte=F('ug_commerce_yr3_enrolled') * 0.5) &
+                         Q(ug_commerce_yr3_present__lt=F('ug_commerce_yr3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_commerce_yr3_75=Sum(
+                Case(
+                    When(Q(ug_commerce_yr3_present__gte=F(
+                        'ug_commerce_yr3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_professional_exist=Count('ug_professional_exist'),
+            ug_professional_sem1_50=Sum(
+                Case(
+                    When(Q(ug_professional_sem1_present__lt=F(
+                        'ug_professional_sem1_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_professional_sem1_50_to_75=Sum(
+                Case(
+                    When(Q(ug_professional_sem1_present__gte=F('ug_professional_sem1_enrolled') * 0.5) &
+                         Q(ug_professional_sem1_present__lt=F('ug_professional_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_professional_sem1_75=Sum(
+                Case(
+                    When(Q(ug_professional_sem1_present__gte=F(
+                        'ug_professional_sem1_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_professional_sem2_50=Sum(
+                Case(
+                    When(Q(ug_professional_sem2_present__lt=F(
+                        'ug_professional_sem2_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_professional_sem2_50_to_75=Sum(
+                Case(
+                    When(Q(ug_professional_sem2_present__gte=F('ug_professional_sem2_enrolled') * 0.5) &
+                         Q(ug_professional_sem2_present__lt=F('ug_professional_sem2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_professional_sem2_75=Sum(
+                Case(
+                    When(Q(ug_professional_sem2_present__gte=F(
+                        'ug_professional_sem2_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_professional_sem3_50=Sum(
+                Case(
+                    When(Q(ug_professional_sem3_present__lt=F(
+                        'ug_professional_sem3_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_professional_sem3_50_to_75=Sum(
+                Case(
+                    When(Q(ug_professional_sem3_present__gte=F('ug_professional_sem3_enrolled') * 0.5) &
+                         Q(ug_professional_sem3_present__lt=F('ug_professional_sem3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_professional_sem3_75=Sum(
+                Case(
+                    When(Q(ug_professional_sem3_present__gte=F(
+                        'ug_professional_sem3_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_professional_sem4_50=Sum(
+                Case(
+                    When(Q(ug_professional_sem4_present__lt=F(
+                        'ug_professional_sem4_enrolled') * 0.5), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_professional_sem4_50_to_75=Sum(
+                Case(
+                    When(Q(ug_professional_sem4_present__gte=F('ug_professional_sem4_enrolled') * 0.5) &
+                         Q(ug_professional_sem4_present__lt=F('ug_professional_sem4_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+            ug_professional_sem4_75=Sum(
+                Case(
+                    When(Q(ug_professional_sem4_present__gte=F(
+                        'ug_professional_sem4_enrolled') * 0.75), then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ),
+
+        )
+        # Format the filename using the user_date
+        filename = f"{university_name}_R2_{user_date}.csv"
+
+        # Create a response object for delivering csv data.
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={'Content-Disposition': f'attachment; filename="{filename}"'},
+        )
+
+        # Create a csv writer object and write the header
+        writer = csv.writer(response)
+        writer.writerow([
+                        'College Type',
+                        'Number of Colleges Pg',
+                        'Pg Arts Sem1 less than 50%',
+                        'Pg Arts Sem1 between 50% and 75%',
+                        'Pg Arts Sem1 between 75%',
+                        'Pg Arts Sem2 less than 50%',
+                        'Pg Arts Sem2 between 50% and 75%',
+                        'Pg Arts Sem2 between 75%',
+                        'Pg Arts Sem3 less than 50%',
+                        'Pg Arts Sem3 between 50% and 75%',
+                        'Pg Arts Sem3 between 75%',
+                        'Pg Arts Sem4 less than 50%',
+                        'Pg Arts Sem4 between 50% and 75%',
+                        'Pg Arts Sem4 between 75%',
+                        'Number of Colleges Pg Science',
+                        'Pg Science Sem1 less than 50%',
+                        'Pg Science Sem1 between 50% and 75%',
+                        'Pg Science Sem1 between 75%',
+                        'Pg Science Sem2 less than 50%',
+                        'Pg Science Sem2 between 50% and 75%',
+                        'Pg Science Sem2 between 75%',
+                        'Pg Science Sem3 less than 50%',
+                        'Pg Science Sem3 between 50% and 75%',
+                        'Pg Science Sem3 between 75%',
+                        'Pg Science Sem4 less than 50%',
+                        'Pg Science Sem4 between 50% and 75%',
+                        'Pg Science Sem4 between 75%',
+                        'Number of Colleges Pg commerce',
+                        'Pg commerce Sem1 less than 50%',
+                        'Pg commerce Sem1 between 50% and 75%',
+                        'Pg commerce Sem1 between 75%',
+                        'Pg commerce Sem2 less than 50%',
+                        'Pg commerce Sem2 between 50% and 75%',
+                        'Pg commerce Sem2 between 75%',
+                        'Pg commerce Sem3 less than 50%',
+                        'Pg commerce Sem3 between 50% and 75%',
+                        'Pg commerce Sem3 between 75%',
+                        'Pg commerce Sem4 less than 50%',
+                        'Pg commerce Sem4 between 50% and 75%',
+                        'Pg commerce Sem4 between 75%',
+                        'Number of Colleges Pg professional',
+                        'Pg professional Sem1 less than 50%',
+                        'Pg professional Sem1 between 50% and 75%',
+                        'Pg professional Sem1 between 75%',
+                        'Pg professional Sem2 less than 50%',
+                        'Pg professional Sem2 between 50% and 75%',
+                        'Pg professional Sem2 between 75%',
+                        'Pg professional Sem3 less than 50%',
+                        'Pg professional Sem3 between 50% and 75%',
+                        'Pg professional Sem3 between 75%',
+                        'Pg professional Sem4 less than 50%',
+                        'Pg professional Sem4 between 50% and 75%',
+                        'Pg professional Sem4 between 75%',
+                        'Number of Colleges ug arts',
+                        'ug arts Sem1 less than 50%',
+                        'ug arts Sem1 between 50% and 75%',
+                        'ug arts Sem1 between 75%',
+                        'ug arts yr2 less than 50%',
+                        'ug arts yr2 between 50% and 75%',
+                        'ug arts yr2 between 75%',
+                        'ug arts yr3 less than 50%',
+                        'ug arts yr3 between 50% and 75%',
+                        'ug arts yr3 between 75%',
+                        'Number of Colleges ug science',
+                        'ug science Sem1 less than 50%',
+                        'ug science Sem1 between 50% and 75%',
+                        'ug science Sem1 between 75%',
+                        'ug science yr2 less than 50%',
+                        'ug science yr2 between 50% and 75%',
+                        'ug science yr2 between 75%',
+                        'ug science yr3 less than 50%',
+                        'ug science yr3 between 50% and 75%',
+                        'ug science yr3 between 75%',
+                        'ug commerce Sem1 less than 50%',
+                        'ug commerce Sem1 between 50% and 75%',
+                        'ug commerce Sem1 between 75%',
+                        'ug commerce yr2 less than 50%',
+                        'ug commerce yr2 between 50% and 75%',
+                        'ug commerce yr2 between 75%',
+                        'ug commerce yr3 less than 50%',
+                        'ug commerce yr3 between 50% and 75%',
+                        'ug commerce yr3 between 75%',
+                        'Number of Colleges ug professional',
+                        'ug professional Sem1 less than 50%',
+                        'ug professional Sem1 between 50% and 75%',
+                        'ug professional Sem1 between 75%',
+                        'ug professional sem2 less than 50%',
+                        'ug professional sem2 between 50% and 75%',
+                        'ug professional sem2 between 75%',
+                        'ug professional sem3 less than 50%',
+                        'ug professional sem3 between 50% and 75%',
+                        'ug professional sem3 between 75%',
+                        'ug professional Sem4 less than 50%',
+                        'ug professional Sem4 between 50% and 75%',
+                        'ug professional Sem4 between 75%',
+                        ])
+
+        # Write data rows
+        for data in grouped_data:
+            writer.writerow(
+                [data['college_type'],
+                 data['pg_arts_exist'],
+                 data['pg_arts_sem1_50'],
+                 data['pg_arts_sem1_50_to_75'],
+                 data['pg_arts_sem1_75'],
+                 data['pg_arts_sem2_50'],
+                 data['pg_arts_sem2_50_to_75'],
+                 data['pg_arts_sem2_75'],
+                 data['pg_arts_sem3_50'],
+                 data['pg_arts_sem3_50_to_75'],
+                 data['pg_arts_sem3_75'],
+                 data['pg_arts_sem4_50'],
+                 data['pg_arts_sem4_50_to_75'],
+                 data['pg_arts_sem4_75'],
+                 data['pg_science_exist'],
+                 data['pg_science_sem1_50'],
+                 data['pg_science_sem1_50_to_75'],
+                 data['pg_science_sem1_75'],
+                 data['pg_science_sem2_50'],
+                 data['pg_science_sem2_50_to_75'],
+                 data['pg_science_sem2_75'],
+                 data['pg_science_sem3_50'],
+                 data['pg_science_sem3_50_to_75'],
+                 data['pg_science_sem3_75'],
+                 data['pg_science_sem4_50'],
+                 data['pg_science_sem4_50_to_75'],
+                 data['pg_science_sem4_75'],
+                 data['pg_commerce_exist'],
+                 data['pg_commerce_sem1_50'],
+                 data['pg_commerce_sem1_50_to_75'],
+                 data['pg_commerce_sem1_75'],
+                 data['pg_commerce_sem2_50'],
+                 data['pg_commerce_sem2_50_to_75'],
+                 data['pg_commerce_sem2_75'],
+                 data['pg_commerce_sem3_50'],
+                 data['pg_commerce_sem3_50_to_75'],
+                 data['pg_commerce_sem3_75'],
+                 data['pg_commerce_sem4_50'],
+                 data['pg_commerce_sem4_50_to_75'],
+                 data['pg_commerce_sem4_75'],
+                 data['pg_professional_exist'],
+                 data['pg_professional_sem1_50'],
+                 data['pg_professional_sem1_50_to_75'],
+                 data['pg_professional_sem1_75'],
+                 data['pg_professional_sem2_50'],
+                 data['pg_professional_sem2_50_to_75'],
+                 data['pg_professional_sem2_75'],
+                 data['pg_professional_sem3_50'],
+                 data['pg_professional_sem3_50_to_75'],
+                 data['pg_professional_sem3_75'],
+                 data['pg_professional_sem4_50'],
+                 data['pg_professional_sem4_50_to_75'],
+                 data['pg_professional_sem4_75'],
+                 data['ug_arts_exist'],
+                 data['ug_arts_sem1_50'],
+                 data['ug_arts_sem1_50_to_75'],
+                 data['ug_arts_sem1_75'],
+                 data['ug_arts_yr2_50'],
+                 data['ug_arts_yr2_50_to_75'],
+                 data['ug_arts_yr2_75'],
+                 data['ug_arts_yr3_50'],
+                 data['ug_arts_yr3_50_to_75'],
+                 data['ug_arts_yr3_75'],
+                 data['ug_science_exist'],
+                 data['ug_science_sem1_50'],
+                 data['ug_science_sem1_50_to_75'],
+                 data['ug_science_sem1_75'],
+                 data['ug_science_yr2_50'],
+                 data['ug_science_yr2_50_to_75'],
+                 data['ug_science_yr2_75'],
+                 data['ug_science_yr3_50'],
+                 data['ug_science_yr3_50_to_75'],
+                 data['ug_science_yr3_75'],
+                 data['ug_commerce_exist'],
+                 data['ug_commerce_sem1_50'],
+                 data['ug_commerce_sem1_50_to_75'],
+                 data['ug_commerce_sem1_75'],
+                 data['ug_commerce_yr2_50'],
+                 data['ug_commerce_yr2_50_to_75'],
+                 data['ug_commerce_yr2_75'],
+                 data['ug_commerce_yr3_50'],
+                 data['ug_commerce_yr3_50_to_75'],
+                 data['ug_commerce_yr3_75'],
+                 data['ug_professional_exist'],
+                 data['ug_professional_sem1_50'],
+                 data['ug_professional_sem1_50_to_75'],
+                 data['ug_professional_sem1_75'],
+                 data['ug_professional_sem2_50'],
+                 data['ug_professional_sem2_50_to_75'],
+                 data['ug_professional_sem2_75'],
+                 data['ug_professional_sem3_50'],
+                 data['ug_professional_sem3_50_to_75'],
+                 data['ug_professional_sem3_75'],
+                 data['ug_professional_sem4_50'],
+                 data['ug_professional_sem4_50_to_75'],
+                 data['ug_professional_sem4_75'],
+                 ])
+
+        return response
+    else:
+        return HttpResponse("No valid date provided", status=400)
+
+
 def generate_R3(request):
     user_date = request.GET.get('user_date')
     print(user_date)
     if user_date:
         filtered_data = Questionnaire.objects.filter(date=user_date)
         print('HI')
-        grouped_data = filtered_data.values('college_type', 'university_name').annotate(
+        grouped_data = filtered_data.values('college_type', 'university_name').order_by('college_type').annotate(
             colleges_filled=Count('university_name'),
             enrollment=Sum('enrolled'),
             present=Sum('present'),
