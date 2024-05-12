@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monitoring Form</title>
+  </head>
+  <body>
+    <div class="background-container">
+      <div class="background-image"></div>
+    </div>
+
+    <div class="wrapper">
+      <div class="overlay"></div>
+      <nav class="nav">
+        <div class="nav-logo">
+          <p>शिक्षा विभाग, बिहार (Higher Education Monitoring for Colleges)</p>
+        </div>
+        <div class="nav-menu" id="navMenu">
+          <ul>
+            <li>
+              <a href="{% url 'signin' %}" id="home" class="link"
+                >Start Filling</a
+              >
+            </li>
+            <li>
+              <a
+                href="/submit-form-course/{{ request.user.username }}"
+                id="home"
+                class="link"
+                >Course Form</a
+              >
+            </li>
+            <li>
+              <a href="/submit-form/{{ request.user.username }}" id="home" class="link"
+                >Questionnaire Form</a
+              >
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      {% block content %} {% endblock content %}
+    </div>
+
+    {% for message in messages %}
+    <div
+      class="alert alert-{{message.tags}}"
+      role="alert"
+      style="margin-top: 30px"
+    >
+      <h5>{{message}}</h5>
+    </div>
+    {% endfor %}
+  </body>
+</html>
