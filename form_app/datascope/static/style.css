@@ -40,7 +40,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.578);
+    background-color: rgba(0, 0, 0, 0.2);
     z-index: 1;
 }
 
@@ -59,8 +59,8 @@ body {
     display: flex;
     justify-content: space-around;
     width: 100%;
-    height: 15vw;
-    line-height: 12vh;
+    height: 15%;
+    line-height: 10vh;
     background: linear-gradient(rgba(0, 0, 0, 1), transparent);
     z-index: 3;
 }
@@ -114,7 +114,7 @@ form {
     content: "";
     top: 0;
     left: 0;
-    background-color: rgba(255, 255, 255, 0.723); /* Semi-transparent white */
+    background-color: rgb(171, 171, 171); /* Semi-transparent white */
     z-index: 2;
 }
 
